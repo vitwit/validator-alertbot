@@ -1,6 +1,6 @@
 # Validator rpc end point(RPC of your own validator)
 #useful to gather information about network info, validatr voting power etc.
-validator_rpc_endpoint = "http://46.101.176.149:26657"
+validator_rpc_endpoint = "http://localhost:26657"
 
 # Operator address of your validator
 #which will be used to get staking, delegation and distribution rewards.
