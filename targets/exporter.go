@@ -1,4 +1,4 @@
-package server
+package targets
 
 import (
 	"log"
