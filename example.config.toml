@@ -1,25 +1,25 @@
 # Validator rpc end point(RPC of your own validator)
 #useful to gather information about network info, validatr voting power etc.
-validator_rpc_endpoint = "https://localhost:26657"
+validator_rpc_endpoint = "http://46.101.176.149:26657"
 
 # Operator address of your validator
 #which will be used to get staking, delegation and distribution rewards.
-val_operator_addr = "akashvaloper1qwlcuf2c2dhtgy8z5y7xxqassw6km0n5mw30l12"
+val_operator_addr = "akashvaloper1qwlcuf2c2dhtgy8z5y7xxas96km0n5mw7821"
 
 # Your validator account address
 #which will be used to get account informtion.
-account_addr = "akash1rqqyllq4d02qmnjy80q5wwhdz93j37zvrfkcgm"
+account_addr = "akash1rqqyllq4d02qmnjy80q5wggh93j37zvrfkcga"
 
 # Validator hex address
 #useful to know about missed blocks and voting power.
-validator_hex_addr = "2C9CCC317FB283D54AC748838A64F29106039H98"
+validator_hex_addr = "FABFCE1BAA453EAF8255BEDC5EE8E432AAA37B5"
 
 # Address of your lcd client
-lcd_endpoint = "https://localhost:1317"
+lcd_endpoint = "http://localhost:1317"
 
 # External open RPC endpoint(secondary RPC other than your own validator).
 #useful to gather information like validator caught up, syncing and missed blocks etc.
-external_rpc = "http://13.52.88.75:26657"
+external_rpc = "http://46.101.176.149:26657"
 
 # Name of your validator to be displayed in alerts
 validator_name = "Akash"
@@ -28,6 +28,9 @@ validator_name = "Akash"
 # To receive validator status daily (twice), configure these parameters in the form of "02:25PM". The time here refers to UTC time.
 alert_time1 = "02:30PM"
 alert_time2 = "02:30AM"
+
+# Configure this field to yes if you want to get alerts about balance change
+balance_change_alert = "yes"
 
 # An integer value to receive block difference alerts
 #If you want to receive this alert make enable_alert to yes otherwise no
@@ -47,13 +50,10 @@ voting_power_threshold = 50
 enable_alert = "yes"
 num_peers_threshold = 0
 
-# Configure this field to yes if you want to get alerts about balance change
-balance_change_alert = "yes"
-
 # Configure telegarm bot details to  get alerts
 [telegram]
-tg_chat_id = -100130357121
-tg_bot_token = "1117273891:AAEtr3ZU5x4JRj5YSF4LBeu1fPAhk9xj-UI"
+tg_chat_id = 2282431205
+tg_bot_token = "1117273891:AAEtr3ZU5x4JRj5YSF4LBa12PF0T4xj-UI"
 
 
 # Configure sendgrid account detals to get email alerts

@@ -49,14 +49,14 @@ func ValidatorStatusAlert(ops HTTPOptions, cfg *config.Config, c client.Client) 
 	validatorStatus := validatorResp.Result.Jailed
 
 	if !validatorStatus {
-		_ = writeToInfluxDb(c, bp, "vcf_val_status", map[string]string{}, map[string]interface{}{"status": "voting"})
+		_ = writeToInfluxDb(c, bp, "vab_val_status", map[string]string{}, map[string]interface{}{"status": "voting"})
 		if t == a1 || t == a2 {
 			_ = SendTelegramAlert(fmt.Sprintf("Your validator %s is currently voting", cfg.ValidatorName), cfg)
 			_ = SendEmailAlert(fmt.Sprintf("Your validator is currently voting"), cfg)
 			log.Println("Sent validator status alert")
 		}
 	} else {
-		_ = writeToInfluxDb(c, bp, "vcf_val_status", map[string]string{}, map[string]interface{}{"status": "jailed"})
+		_ = writeToInfluxDb(c, bp, "vab_val_status", map[string]string{}, map[string]interface{}{"status": "jailed"})
 		if t == a1 || t == a2 {
 			_ = SendTelegramAlert(fmt.Sprintf("Your validator %s is in jailed status", cfg.ValidatorName), cfg)
 			_ = SendEmailAlert(fmt.Sprintf("Your validator is in jailed status"), cfg)
@@ -100,7 +100,7 @@ func CheckValidatorJailed(cfg *config.Config) error {
 // GetValStatusFromDB returns latest current height from db
 func GetValStatusFromDB(cfg *config.Config, c client.Client) string {
 	var valStatus string
-	q := client.NewQuery("SELECT last(status) FROM vcf_val_status", cfg.InfluxDB.Database, "")
+	q := client.NewQuery("SELECT last(status) FROM vab_val_status", cfg.InfluxDB.Database, "")
 	if response, err := c.Query(q); err == nil && response.Error() == nil {
 		for _, r := range response.Results {
 			if len(r.Series) != 0 {

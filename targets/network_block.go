@@ -38,7 +38,7 @@ func GetNetworkLatestBlock(ops HTTPOptions, cfg *config.Config, c client.Client)
 		if err != nil {
 			log.Println("Error while converting network height from string to int ", err)
 		}
-		_ = writeToInfluxDb(c, bp, "vcf_network_latest_block", map[string]string{}, map[string]interface{}{"block_height": networkBlockHeight})
+		_ = writeToInfluxDb(c, bp, "vab_network_latest_block", map[string]string{}, map[string]interface{}{"block_height": networkBlockHeight})
 		log.Printf("Network height: %d", networkBlockHeight)
 
 		// Calling function to get validator latest
@@ -52,7 +52,7 @@ func GetNetworkLatestBlock(ops HTTPOptions, cfg *config.Config, c client.Client)
 		vaidatorBlockHeight, _ := strconv.Atoi(validatorHeight)
 		heightDiff := networkBlockHeight - vaidatorBlockHeight
 
-		_ = writeToInfluxDb(c, bp, "vcf_height_difference", map[string]string{}, map[string]interface{}{"difference": heightDiff})
+		_ = writeToInfluxDb(c, bp, "vab_height_difference", map[string]string{}, map[string]interface{}{"difference": heightDiff})
 		log.Printf("Network height: %d and Validator Height: %d", networkBlockHeight, vaidatorBlockHeight)
 
 		blockDiffThreshold := cfg.BlockDiffAlert.BlockDiffThreshold
@@ -69,7 +69,7 @@ func GetNetworkLatestBlock(ops HTTPOptions, cfg *config.Config, c client.Client)
 // GetNetworkBlock returns network current block height
 func GetNetworkBlock(cfg *config.Config, c client.Client) string {
 	var networkHeight string
-	q := client.NewQuery("SELECT last(block_height) FROM vcf_network_latest_block", cfg.InfluxDB.Database, "")
+	q := client.NewQuery("SELECT last(block_height) FROM vab_network_latest_block", cfg.InfluxDB.Database, "")
 	if response, err := c.Query(q); err == nil && response.Error() == nil {
 		for _, r := range response.Results {
 			if len(r.Series) != 0 {

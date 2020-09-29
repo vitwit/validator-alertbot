@@ -50,7 +50,7 @@ func GetValidatorVotingPower(ops HTTPOptions, cfg *config.Config, c client.Clien
 			} else {
 				vp = "0"
 			}
-			_ = writeToInfluxDb(c, bp, "vcf_voting_power", map[string]string{}, map[string]interface{}{"power": vp})
+			_ = writeToInfluxDb(c, bp, "vab_voting_power", map[string]string{}, map[string]interface{}{"power": vp})
 			log.Println("Voting Power \n", vp)
 
 			votingPower, err := strconv.Atoi(vp)
@@ -70,7 +70,7 @@ func GetValidatorVotingPower(ops HTTPOptions, cfg *config.Config, c client.Clien
 // GetVotingPowerFromDb returns voting power of a validator from db
 func GetVotingPowerFromDb(cfg *config.Config, c client.Client) string {
 	var vp string
-	q := client.NewQuery("SELECT last(power) FROM vcf_voting_power", cfg.InfluxDB.Database, "")
+	q := client.NewQuery("SELECT last(power) FROM vab_voting_power", cfg.InfluxDB.Database, "")
 	if response, err := c.Query(q); err == nil && response.Error() == nil {
 		for _, r := range response.Results {
 			if len(r.Series) != 0 {

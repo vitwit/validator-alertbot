@@ -36,7 +36,7 @@ func GetGaiaCliStatus(ops HTTPOptions, cfg *config.Config, c client.Client) {
 	currentBlockHeight := status.Result.SyncInfo.LatestBlockHeight
 	if currentBlockHeight != "" {
 		bh, _ = strconv.Atoi(currentBlockHeight)
-		p2, err := createDataPoint("vcf_current_block_height", map[string]string{}, map[string]interface{}{"height": bh})
+		p2, err := createDataPoint("vab_current_block_height", map[string]string{}, map[string]interface{}{"height": bh})
 		if err == nil {
 			pts = append(pts, p2)
 		}
@@ -51,7 +51,7 @@ func GetGaiaCliStatus(ops HTTPOptions, cfg *config.Config, c client.Client) {
 	} else {
 		synced = 1
 	}
-	p3, err := createDataPoint("vcf_node_synced", map[string]string{}, map[string]interface{}{"status": synced})
+	p3, err := createDataPoint("vab_node_synced", map[string]string{}, map[string]interface{}{"status": synced})
 	if err == nil {
 		pts = append(pts, p3)
 	}
@@ -65,7 +65,7 @@ func GetGaiaCliStatus(ops HTTPOptions, cfg *config.Config, c client.Client) {
 // GetValidatorBlockHeight returns validator current block height from db
 func GetValidatorBlockHeight(cfg *config.Config, c client.Client) string {
 	var validatorHeight string
-	q := client.NewQuery("SELECT last(height) FROM vcf_current_block_height", cfg.InfluxDB.Database, "")
+	q := client.NewQuery("SELECT last(height) FROM vab_current_block_height", cfg.InfluxDB.Database, "")
 	if response, err := c.Query(q); err == nil && response.Error() == nil {
 		for _, r := range response.Results {
 			if len(r.Series) != 0 {
@@ -85,7 +85,7 @@ func GetValidatorBlockHeight(cfg *config.Config, c client.Client) string {
 // GetNodeSync returns the syncing status of a node
 func GetNodeSync(cfg *config.Config, c client.Client) string {
 	var status, sync string
-	q := client.NewQuery("SELECT last(status) FROM vcf_node_synced", cfg.InfluxDB.Database, "")
+	q := client.NewQuery("SELECT last(status) FROM vab_node_synced", cfg.InfluxDB.Database, "")
 	if response, err := c.Query(q); err == nil && response.Error() == nil {
 		for _, r := range response.Results {
 			if len(r.Series) != 0 {

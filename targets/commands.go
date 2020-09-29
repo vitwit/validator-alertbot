@@ -13,7 +13,7 @@ import (
 func TelegramAlerting(ops HTTPOptions, cfg *config.Config, c client.Client) {
 	bot, err := tgbotapi.NewBotAPI(cfg.Telegram.BotToken)
 	if err != nil {
-		log.Panic(err)
+		log.Fatalf("Please configure telegram bot token :", err)
 	}
 
 	bot.Debug = true
@@ -30,7 +30,6 @@ func TelegramAlerting(ops HTTPOptions, cfg *config.Config, c client.Client) {
 	msgToSend := ""
 
 	for update := range updates {
-		log.Println("Cmng here..", update.Message.Text)
 		if update.Message == nil { // ignore any non-Message Updates
 			continue
 		}

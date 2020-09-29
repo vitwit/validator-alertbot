@@ -38,8 +38,8 @@ func GetAccountInfo(ops HTTPOptions, cfg *config.Config, c client.Client) {
 		amount := accResp.Result[0].Amount
 		denom := accResp.Result[0].Denom
 		prevAmount := GetAccountBalFromDb(cfg, c)
-		if prevAmount != amount {
 
+		if prevAmount != amount {
 			if strings.ToUpper(cfg.BalanceChangeAlerts) == "YES" {
 				amount1 := ConvertToAKT(prevAmount)
 				amount2 := ConvertToAKT(amount)
@@ -48,7 +48,7 @@ func GetAccountInfo(ops HTTPOptions, cfg *config.Config, c client.Client) {
 			}
 		}
 
-		_ = writeToInfluxDb(c, bp, "vcf_account_balance", map[string]string{}, map[string]interface{}{"balance": amount, "denom": denom})
+		_ = writeToInfluxDb(c, bp, "vab_account_balance", map[string]string{}, map[string]interface{}{"balance": amount, "denom": denom})
 		log.Printf("Address Balance: %s \t and denom : %s", amount, denom)
 	}
 }
@@ -66,7 +66,7 @@ func ConvertToAKT(balance string) string {
 // GetAccountBalFromDb returns account balance from db
 func GetAccountBalFromDb(cfg *config.Config, c client.Client) string {
 	var balance string
-	q := client.NewQuery("SELECT last(balance) FROM vcf_account_balance", cfg.InfluxDB.Database, "")
+	q := client.NewQuery("SELECT last(balance) FROM vab_account_balance", cfg.InfluxDB.Database, "")
 	if response, err := c.Query(q); err == nil && response.Error() == nil {
 		for _, r := range response.Results {
 			if len(r.Series) != 0 {
