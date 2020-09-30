@@ -42,10 +42,10 @@ func TelegramAlerting(ops HTTPOptions, cfg *config.Config, c client.Client) {
 			msgToSend = GetPeersCountMsg(cfg, c)
 		} else if update.Message.Text == "/balance" {
 			msgToSend = GetAccountBal(cfg, c)
-		} else if update.Message.Text == "/help" {
+		} else if update.Message.Text == "/list" {
 			msgToSend = GetHelp()
 		} else {
-			msgToSend = "Command not found do /help to know about available commands"
+			msgToSend = "Command not found do /list to know about available commands"
 		}
 
 		log.Printf("[%s] %s", update.Message.From.UserName, msgToSend)
@@ -61,7 +61,7 @@ func TelegramAlerting(ops HTTPOptions, cfg *config.Config, c client.Client) {
 func GetHelp() string {
 	msg := "List of available commands\n /status - returns validator status, voting power, current block height " +
 		"and network block height\n /peers - returns number of connected peers\n /node - return status of caught-up\n" +
-		"/balance - returns the current balance of your account \n /help - list out the available commands"
+		"/balance - returns the current balance of your account \n /list - list out the available commands"
 
 	return msg
 }

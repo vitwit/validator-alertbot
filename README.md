@@ -153,7 +153,7 @@ $ docker run -d --name validator-alertbot alertbot
  - /node : Gives status of caught-up
  - /peers : Returns number of connected peers
  - /balance : Returns the current balance of your account
- - /help : List of available commands
+ - /list : List of available commands
 
  ## Feedback and Questions
 
