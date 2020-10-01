@@ -3,6 +3,7 @@ package targets
 import (
 	"fmt"
 	"log"
+	"strings"
 	"validator-alertbot/config"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -45,15 +46,24 @@ func TelegramAlerting(ops HTTPOptions, cfg *config.Config, c client.Client) {
 		} else if update.Message.Text == "/list" {
 			msgToSend = GetHelp()
 		} else {
-			msgToSend = "Command not found do /list to know about available commands"
+			text := strings.Split(update.Message.Text, "")
+			if len(text) != 0 {
+				if text[0] == "/" {
+					msgToSend = "Command not found do /list to know about available commands"
+				} else {
+					msgToSend = " "
+				}
+			}
 		}
 
 		log.Printf("[%s] %s", update.Message.From.UserName, msgToSend)
 
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgToSend)
-		msg.ReplyToMessageID = update.Message.MessageID
+		if msgToSend != " " {
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgToSend)
+			msg.ReplyToMessageID = update.Message.MessageID
 
-		bot.Send(msg)
+			bot.Send(msg)
+		}
 	}
 }
 
