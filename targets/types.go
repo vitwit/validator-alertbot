@@ -75,7 +75,7 @@ type (
 			Block   struct {
 				Header interface{} `json:"header"`
 				Data   struct {
-					Txs interface{} `json:"txs"`
+					Txs []string `json:"txs"`
 				} `json:"data"`
 				Evidence struct {
 					Evidence interface{} `json:"evidence"`
@@ -245,5 +245,45 @@ type (
 	AccountResp struct {
 		Height string           `json:"height"`
 		Result []AccountBalance `json:"result"`
+	}
+
+	TxHashResp struct {
+		Height    string      `json:"height"`
+		Txhash    string      `json:"txhash"`
+		RawLog    string      `json:"raw_log"`
+		Logs      interface{} `json:"logs"`
+		GasWanted string      `json:"gas_wanted"`
+		GasUsed   string      `json:"gas_used"`
+		Tx        struct {
+			Type  string `json:"type"`
+			Value struct {
+				Msg []struct {
+					Type  string `json:"type"`
+					Value struct {
+						DelegatorAddress    string `json:"delegator_address"`
+						ValidatorAddress    string `json:"validator_address"`
+						ValidatorSrcAddress string `json:"validator_src_address"`
+						ValidatorDstAddress string `json:"validator_dst_address"`
+						Amount              struct {
+							Denom  string `json:"denom"`
+							Amount string `json:"amount"`
+						} `json:"amount"`
+					} `json:"value"`
+				} `json:"msg"`
+				Fee struct {
+					Amount []interface{} `json:"amount"`
+					Gas    string        `json:"gas"`
+				} `json:"fee"`
+				Signatures []struct {
+					PubKey struct {
+						Type  string `json:"type"`
+						Value string `json:"value"`
+					} `json:"pub_key"`
+					Signature string `json:"signature"`
+				} `json:"signatures"`
+				Memo string `json:"memo"`
+			} `json:"value"`
+		} `json:"tx"`
+		Timestamp time.Time `json:"timestamp"`
 	}
 )

@@ -79,16 +79,6 @@ func InitTargets(cfg *config.Config) *Targets {
 		},
 		{
 			ExecutionType: "http",
-			Name:          "Validator Voting Power",
-			HTTPOptions: HTTPOptions{
-				Endpoint: cfg.LCDEndpoint + "/staking/validators/" + cfg.ValOperatorAddress,
-				Method:   http.MethodGet,
-			},
-			Func:        GetValidatorVotingPower,
-			ScraperRate: cfg.Scraper.Rate,
-		},
-		{
-			ExecutionType: "http",
 			Name:          "Proposals",
 			HTTPOptions: HTTPOptions{
 				Endpoint: cfg.LCDEndpoint + "/gov/proposals",
@@ -105,6 +95,16 @@ func InitTargets(cfg *config.Config) *Targets {
 				Method:   http.MethodGet,
 			},
 			Func:        GetAccountInfo,
+			ScraperRate: cfg.Scraper.Rate,
+		},
+		{
+			ExecutionType: "http",
+			Name:          "tx alerts",
+			HTTPOptions: HTTPOptions{
+				Endpoint: cfg.ExternalRPC + "/status",
+				Method:   http.MethodGet,
+			},
+			Func:        TxAlerts,
 			ScraperRate: cfg.Scraper.Rate,
 		},
 		{
