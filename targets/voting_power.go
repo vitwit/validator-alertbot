@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math"
 	"strconv"
 	"strings"
 	"validator-alertbot/config"
@@ -33,22 +34,28 @@ func GetValidatorVotingPower(ops HTTPOptions, cfg *config.Config, c client.Clien
 	}
 
 	vp := validatorResp.Result.DelegatorShares
-	delegationShares, _ := strconv.ParseFloat(vp, 64)
-	vp1 := strconv.FormatFloat(delegationShares, 'f', -1, 64)
+	vp1 := convertValue(vp)
 
 	votingPowerFromDb := GetVotingPowerFromDb(cfg, c)
-	delSharesFromDb, _ := strconv.ParseFloat(votingPowerFromDb, 64)
-	vp2 := strconv.FormatFloat(delSharesFromDb, 'f', -1, 64)
 
-	if vp1 != vp2 {
+	if vp1 != votingPowerFromDb {
 		if strings.ToUpper(cfg.VotingPowerAlert.EnableAlert) == "YES" {
-			_ = SendTelegramAlert(fmt.Sprintf("Your validator %s voting power has changed from %s to %s", cfg.ValidatorName, vp2, vp1), cfg)
-			_ = SendEmailAlert(fmt.Sprintf("Your validator %s voting power has changed from %s to %s", cfg.ValidatorName, vp2, vp1), cfg)
+			_ = SendTelegramAlert(fmt.Sprintf("Your validator %s voting power has changed from %s to %s", cfg.ValidatorName, votingPowerFromDb, vp1), cfg)
+			_ = SendEmailAlert(fmt.Sprintf("Your validator %s voting power has changed from %s to %s", cfg.ValidatorName, votingPowerFromDb, vp1), cfg)
 		}
 	}
 
 	_ = writeToInfluxDb(c, bp, "vab_voting_power", map[string]string{}, map[string]interface{}{"power": vp1})
 	log.Println("Voting Power \n", vp)
+}
+
+func convertValue(value string) string {
+	bal, _ := strconv.ParseFloat(value, 64)
+
+	a1 := bal / math.Pow(10, 6)
+	amount := strconv.FormatFloat(a1, 'f', 0, 64)
+
+	return amount
 }
 
 // GetVotingPowerFromDb returns voting power of a validator from db
