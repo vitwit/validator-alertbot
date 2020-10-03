@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"strconv"
 	"strings"
 	"validator-alertbot/config"
 
@@ -50,19 +49,18 @@ func GetValidatorVotingPower(ops HTTPOptions, cfg *config.Config, c client.Clien
 			} else {
 				vp = "0"
 			}
+
+			votingPowerFromDb := GetVotingPowerFromDb(cfg, c)
+
+			if votingPowerFromDb != vp {
+				if strings.ToUpper(cfg.VotingPowerAlert.EnableAlert) == "YES" {
+					_ = SendTelegramAlert(fmt.Sprintf("Your validator %s voting power has changed from %s to %s", cfg.ValidatorName, votingPowerFromDb, vp), cfg)
+					_ = SendEmailAlert(fmt.Sprintf("Your validator %s voting power has changed from %s to %s", cfg.ValidatorName, votingPowerFromDb, vp), cfg)
+				}
+			}
+
 			_ = writeToInfluxDb(c, bp, "vab_voting_power", map[string]string{}, map[string]interface{}{"power": vp})
 			log.Println("Voting Power \n", vp)
-
-			votingPower, err := strconv.Atoi(vp)
-			if err != nil {
-				log.Println("Error wile converting string to int of voting power \t", err)
-			}
-
-			votingPowerThreshold := cfg.VotingPowerAlert.VotingPowerThreshold
-			if strings.ToUpper(cfg.VotingPowerAlert.EnableAlert) == "YES" && int64(votingPower) <= votingPowerThreshold {
-				_ = SendTelegramAlert(fmt.Sprintf("Your validator %s voting power has dropped below %d", cfg.ValidatorName, votingPowerThreshold), cfg)
-				_ = SendEmailAlert(fmt.Sprintf("Your validator %s voting power has dropped below %d", cfg.ValidatorName, votingPowerThreshold), cfg)
-			}
 		}
 	}
 }
