@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 	"validator-alertbot/config"
 
@@ -18,51 +19,36 @@ func GetValidatorVotingPower(ops HTTPOptions, cfg *config.Config, c client.Clien
 		return
 	}
 
-	// Calling function to get current block height
-	currentHeight := GetValidatorBlockHeight(cfg, c)
-	if currentHeight == "" {
-		log.Println("Error while fetching current block height from db ", currentHeight)
-		return
-	}
-
-	ops.Endpoint = ops.Endpoint + "&height=" + currentHeight
-
 	resp, err := HitHTTPTarget(ops)
 	if err != nil {
 		log.Printf("Error: %v", err)
 		return
 	}
 
-	var validatorHeightResp ValidatorsHeight
-	err = json.Unmarshal(resp.Body, &validatorHeightResp)
+	var validatorResp ValidatorResp
+	err = json.Unmarshal(resp.Body, &validatorResp)
 	if err != nil {
 		log.Printf("Error: %v", err)
 		return
 	}
 
-	for _, val := range validatorHeightResp.Result.Validators {
-		if val.Address == cfg.ValidatorHexAddress {
-			var vp string
-			fmt.Printf("VOTING POWER: %s\n", val.VotingPower)
-			if val.VotingPower != "" {
-				vp = val.VotingPower
-			} else {
-				vp = "0"
-			}
+	vp := validatorResp.Result.DelegatorShares
+	delegationShares, _ := strconv.ParseFloat(vp, 64)
+	vp1 := strconv.FormatFloat(delegationShares, 'f', -1, 64)
 
-			votingPowerFromDb := GetVotingPowerFromDb(cfg, c)
+	votingPowerFromDb := GetVotingPowerFromDb(cfg, c)
+	delSharesFromDb, _ := strconv.ParseFloat(votingPowerFromDb, 64)
+	vp2 := strconv.FormatFloat(delSharesFromDb, 'f', -1, 64)
 
-			if votingPowerFromDb != vp {
-				if strings.ToUpper(cfg.VotingPowerAlert.EnableAlert) == "YES" {
-					_ = SendTelegramAlert(fmt.Sprintf("Your validator %s voting power has changed from %s to %s", cfg.ValidatorName, votingPowerFromDb, vp), cfg)
-					_ = SendEmailAlert(fmt.Sprintf("Your validator %s voting power has changed from %s to %s", cfg.ValidatorName, votingPowerFromDb, vp), cfg)
-				}
-			}
-
-			_ = writeToInfluxDb(c, bp, "vab_voting_power", map[string]string{}, map[string]interface{}{"power": vp})
-			log.Println("Voting Power \n", vp)
+	if vp1 != vp2 {
+		if strings.ToUpper(cfg.VotingPowerAlert.EnableAlert) == "YES" {
+			_ = SendTelegramAlert(fmt.Sprintf("Your validator %s voting power has changed from %s to %s", cfg.ValidatorName, vp2, vp1), cfg)
+			_ = SendEmailAlert(fmt.Sprintf("Your validator %s voting power has changed from %s to %s", cfg.ValidatorName, vp2, vp1), cfg)
 		}
 	}
+
+	_ = writeToInfluxDb(c, bp, "vab_voting_power", map[string]string{}, map[string]interface{}{"power": vp1})
+	log.Println("Voting Power \n", vp)
 }
 
 // GetVotingPowerFromDb returns voting power of a validator from db

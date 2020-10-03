@@ -81,7 +81,7 @@ func InitTargets(cfg *config.Config) *Targets {
 			ExecutionType: "http",
 			Name:          "Validator Voting Power",
 			HTTPOptions: HTTPOptions{
-				Endpoint: cfg.ValidatorRPCEndpoint + "/validators?per_page=100",
+				Endpoint: cfg.LCDEndpoint + "/staking/validators/" + cfg.ValOperatorAddress,
 				Method:   http.MethodGet,
 			},
 			Func:        GetValidatorVotingPower,
