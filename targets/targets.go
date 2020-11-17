@@ -49,16 +49,6 @@ func InitTargets(cfg *config.Config) *Targets {
 		},
 		{
 			ExecutionType: "http",
-			Name:          "Get gaiacli status of validator",
-			HTTPOptions: HTTPOptions{
-				Endpoint: cfg.ValidatorRPCEndpoint + "/status?",
-				Method:   http.MethodGet,
-			},
-			Func:        GetGaiaCliStatus,
-			ScraperRate: cfg.Scraper.Rate,
-		},
-		{
-			ExecutionType: "http",
 			Name:          "Network Latest Block",
 			HTTPOptions: HTTPOptions{
 				Endpoint: cfg.ExternalRPC + "/status?",

@@ -4,62 +4,75 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"strconv"
 	"validator-alertbot/config"
 
 	client "github.com/influxdata/influxdb1-client/v2"
 )
 
-// GetGaiaCliStatus to reponse of validator status like
-//current block height and node status
-func GetGaiaCliStatus(ops HTTPOptions, cfg *config.Config, c client.Client) {
+// GetValStatus to reponse of validator status like
+// current block height and node status
+func GetValStatus(ops HTTPOptions, cfg *config.Config, c client.Client) string {
 	bp, err := createBatchPoints(cfg.InfluxDB.Database)
 	if err != nil {
-		return
+		return ""
 	}
 	var pts []*client.Point
 
-	resp, err := HitHTTPTarget(ops)
+	resp, err := HitHTTPTarget(HTTPOptions{
+		Endpoint: cfg.ValidatorRPCEndpoint + "/status?",
+		Method:   http.MethodGet,
+	})
+
 	if err != nil {
 		log.Printf("Error: %v", err)
-		return
+		return ""
 	}
 
 	var status ValidatorRPCStatus
 	err = json.Unmarshal(resp.Body, &status)
 	if err != nil {
 		log.Printf("Error: %v", err)
-		return
+		return ""
 	}
 
-	var bh int
 	currentBlockHeight := status.Result.SyncInfo.LatestBlockHeight
-	if currentBlockHeight != "" {
-		bh, _ = strconv.Atoi(currentBlockHeight)
-		p2, err := createDataPoint("vab_current_block_height", map[string]string{}, map[string]interface{}{"height": bh})
-		if err == nil {
-			pts = append(pts, p2)
+	if &status != nil {
+
+		var bh int
+		if currentBlockHeight != "" {
+			bh, _ = strconv.Atoi(currentBlockHeight)
+			p2, err := createDataPoint("vab_current_block_height", map[string]string{}, map[string]interface{}{"height": bh})
+			if err == nil {
+				pts = append(pts, p2)
+			}
 		}
-	}
 
-	var synced int
-	caughtUp := !status.Result.SyncInfo.CatchingUp
-	if !caughtUp {
-		_ = SendTelegramAlert("Your validator node is not synced!", cfg)
-		_ = SendEmailAlert("Your validator node is not synced!", cfg)
-		synced = 0
+		var synced int
+		caughtUp := !status.Result.SyncInfo.CatchingUp
+		if !caughtUp {
+			_ = SendTelegramAlert("Your validator node is not synced!", cfg)
+			_ = SendEmailAlert("Your validator node is not synced!", cfg)
+			synced = 0
+		} else {
+			synced = 1
+		}
+		p3, err := createDataPoint("vab_node_synced", map[string]string{}, map[string]interface{}{"status": synced})
+		if err == nil {
+			pts = append(pts, p3)
+		}
+
+		bp.AddPoints(pts)
+		_ = writeBatchPoints(c, bp)
+		log.Printf("\nCurrent Block Height: %s \nCaught Up? %t \n",
+			currentBlockHeight, caughtUp)
 	} else {
-		synced = 1
-	}
-	p3, err := createDataPoint("vab_node_synced", map[string]string{}, map[string]interface{}{"status": synced})
-	if err == nil {
-		pts = append(pts, p3)
+		_ = SendTelegramAlert("Validator RPC is not workng!", cfg)
+		_ = SendEmailAlert("Validator RPC is not working!", cfg)
 	}
 
-	bp.AddPoints(pts)
-	_ = writeBatchPoints(c, bp)
-	log.Printf("\nCurrent Block Height: %s \nCaught Up? %t \n",
-		currentBlockHeight, caughtUp)
+	return currentBlockHeight
 }
 
 // GetValidatorBlockHeight returns validator current block height from db

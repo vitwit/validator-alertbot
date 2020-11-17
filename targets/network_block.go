@@ -32,6 +32,9 @@ func GetNetworkLatestBlock(ops HTTPOptions, cfg *config.Config, c client.Client)
 		return
 	}
 
+	// Calling function to get validator latest block height
+	validatorHeight := GetValStatus(ops, cfg, c)
+
 	if &networkBlock != nil {
 
 		networkBlockHeight, err := strconv.Atoi(networkBlock.Result.SyncInfo.LatestBlockHeight)
@@ -41,11 +44,8 @@ func GetNetworkLatestBlock(ops HTTPOptions, cfg *config.Config, c client.Client)
 		_ = writeToInfluxDb(c, bp, "vab_network_latest_block", map[string]string{}, map[string]interface{}{"block_height": networkBlockHeight})
 		log.Printf("Network height: %d", networkBlockHeight)
 
-		// Calling function to get validator latest
-		// block height
-		validatorHeight := GetValidatorBlockHeight(cfg, c)
 		if validatorHeight == "" {
-			log.Println("Error while fetching validator block height from db ", validatorHeight)
+			log.Println("Error while gettting validator block height ", validatorHeight)
 			return
 		}
 
@@ -63,6 +63,9 @@ func GetNetworkLatestBlock(ops HTTPOptions, cfg *config.Config, c client.Client)
 
 			log.Println("Sent alert of block height difference")
 		}
+	} else {
+		_ = SendTelegramAlert("External RPC is not working!", cfg)
+		_ = SendEmailAlert("External RPC is not working!", cfg)
 	}
 }
 
