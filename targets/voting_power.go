@@ -25,6 +25,15 @@ func GetValidatorVotingPower(ops HTTPOptions, cfg *config.Config, c client.Clien
 		Method:   http.MethodGet,
 	})
 
+	if err != nil {
+		log.Printf("Error in validator voting power : %v", err)
+		return err.Error()
+	}
+
+	if resp.Body == nil {
+		return ""
+	}
+
 	var validatorResp ValidatorResp
 	err = json.Unmarshal(resp.Body, &validatorResp)
 	if err != nil {
