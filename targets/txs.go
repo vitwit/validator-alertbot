@@ -52,6 +52,14 @@ func TxAlerts(ops HTTPOptions, cfg *config.Config, c client.Client) {
 			Endpoint: cfg.LCDEndpoint + "/txs/" + txHash,
 			Method:   "GET",
 		})
+		if err != nil {
+			log.Printf("Error in transactoons : %v", err)
+		}
+
+		if resp.Body == nil {
+			log.Printf("Error while getting txs : %v", err)
+			return
+		}
 
 		var tx TxHashResp
 		err = json.Unmarshal(resp.Body, &tx)
