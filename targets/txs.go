@@ -54,9 +54,10 @@ func TxAlerts(ops HTTPOptions, cfg *config.Config, c client.Client) {
 		})
 		if err != nil {
 			log.Printf("Error in transactoons : %v", err)
+			return
 		}
 
-		if resp.Body == nil {
+		if &resp.Body == nil {
 			log.Printf("Error while getting txs : %v", err)
 			return
 		}
