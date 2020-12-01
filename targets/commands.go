@@ -73,7 +73,7 @@ func TelegramAlerting(ops HTTPOptions, cfg *config.Config, c client.Client) {
 func GetHelp() string {
 	msg := "List of available commands\n /status - returns validator status, voting power, current block height " +
 		"and network block height\n /peers - returns number of connected peers\n /node - return status of caught-up\n" +
-		"/balance - returns the current balance of your account \n /list - list out the available commands"
+		"/balance - returns the current balance of your account \n /rewards - returns validator rewards + commission in AKT\n /list - list out the available commands"
 
 	return msg
 }
