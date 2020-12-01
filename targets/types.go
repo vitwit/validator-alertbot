@@ -286,4 +286,19 @@ type (
 		} `json:"tx"`
 		Timestamp time.Time `json:"timestamp"`
 	}
+
+	DistributionRewards struct {
+		Height string `json:"height"`
+		Result struct {
+			OperatorAddress string `json:"operator_address"`
+			SelfBondRewards []struct {
+				Denom  string `json:"denom"`
+				Amount string `json:"amount"`
+			} `json:"self_bond_rewards"`
+			ValCommission []struct {
+				Denom  string `json:"denom"`
+				Amount string `json:"amount"`
+			} `json:"val_commission"`
+		} `json:"result"`
+	}
 )

@@ -43,6 +43,8 @@ func TelegramAlerting(ops HTTPOptions, cfg *config.Config, c client.Client) {
 			msgToSend = GetPeersCountMsg(cfg, c)
 		} else if update.Message.Text == "/balance" {
 			msgToSend = GetAccountBal(cfg, c)
+		} else if update.Message.Text == "/rewards" {
+			msgToSend = GetValRewards(cfg, c)
 		} else if update.Message.Text == "/list" {
 			msgToSend = GetHelp()
 		} else {
@@ -123,4 +125,14 @@ func GetAccountBal(cfg *config.Config, c client.Client) string {
 	balanceMsg = fmt.Sprintf("Current balance of your account(%s) is %s \n", cfg.AccountAddress, ConvertToAKT(balance))
 
 	return balanceMsg
+}
+
+// GetValRewards will returns the message of val rewards
+func GetValRewards(cfg *config.Config, c client.Client) string {
+	var rewardsMsg string
+
+	rewards := GetRewardsFromDB(cfg, c)
+	rewardsMsg = fmt.Sprintf("Current rewards of your validator(%s) is %s \n", cfg.ValOperatorAddress, rewards)
+
+	return rewardsMsg
 }

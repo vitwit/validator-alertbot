@@ -11,7 +11,7 @@ import (
 	client "github.com/influxdata/influxdb1-client/v2"
 )
 
-// JailedAlerting to send transaction alert to telegram and mail
+// ValidatorStatusAlert is to send alerts alerts about validator status voting/jailed
 func ValidatorStatusAlert(ops HTTPOptions, cfg *config.Config, c client.Client) {
 	log.Println("Coming inside validator status alerting")
 	bp, err := createBatchPoints(cfg.InfluxDB.Database)

@@ -98,6 +98,16 @@ func InitTargets(cfg *config.Config) *Targets {
 			ScraperRate: cfg.Scraper.Rate,
 		},
 		{
+			ExecutionType: "http",
+			Name:          "Current Rewards Amount",
+			HTTPOptions: HTTPOptions{
+				Endpoint: cfg.LCDEndpoint + "/distribution/validators/" + cfg.ValOperatorAddress,
+				Method:   http.MethodGet,
+			},
+			Func:        GetRewradsAndCommission,
+			ScraperRate: cfg.Scraper.Rate,
+		},
+		{
 			ExecutionType: "Telegram command",
 			Name:          "command based alerts",
 			Func:          TelegramAlerting,
