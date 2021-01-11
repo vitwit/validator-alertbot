@@ -248,13 +248,15 @@ type (
 	}
 
 	TxHashResp struct {
-		Height    string      `json:"height"`
-		Txhash    string      `json:"txhash"`
-		RawLog    string      `json:"raw_log"`
-		Logs      interface{} `json:"logs"`
-		GasWanted string      `json:"gas_wanted"`
-		GasUsed   string      `json:"gas_used"`
-		Tx        struct {
+		Height string `json:"height"`
+		Txhash string `json:"txhash"`
+		RawLog string `json:"raw_log"`
+		Logs   []struct {
+			MsgIndex int         `json:"msg_index"`
+			Log      string      `json:"log"`
+			Events   interface{} `json:"events"`
+		} `json:"logs"`
+		Tx struct {
 			Type  string `json:"type"`
 			Value struct {
 				Msg []struct {

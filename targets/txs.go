@@ -68,46 +68,59 @@ func TxAlerts(ops HTTPOptions, cfg *config.Config, c client.Client) {
 			log.Printf("Error: %v", err)
 			return
 		}
-		if len(tx.Tx.Value.Msg) != 0 {
-			txType := tx.Tx.Value.Msg[0].Type
-			txValue := tx.Tx.Value.Msg[0].Value
-			log.Println("txType: ", txType)
 
-			// Calling function to get voting power change alert msg
-			votingPowerMsg := GetValidatorVotingPower(ops, cfg, c)
+		var msgIndex = 1
 
-			if txType == "cosmos-sdk/MsgDelegate" {
-				amount := txValue.Amount.Amount
-				amountInAKT := ConvertToAKT(amount)
-				delegatorAddress := txValue.DelegatorAddress
+		if len(tx.Logs) != 0 {
+			msgIndex = tx.Logs[0].MsgIndex
+		}
 
-				if txValue.ValidatorAddress == cfg.ValOperatorAddress {
-					_ = SendTelegramAlert(fmt.Sprintf("Delegation alert: you have a new delegation %s from %s and %s ", amountInAKT, delegatorAddress, votingPowerMsg), cfg)
-					_ = SendEmailAlert(fmt.Sprintf("Delegation alert: you have a new delegation %s from %s and %s", amountInAKT, delegatorAddress, votingPowerMsg), cfg)
-				}
-			} else if txType == "cosmos-sdk/MsgUndelegate" {
-				amount := txValue.Amount.Amount
-				amountInAKT := ConvertToAKT(amount)
+		log.Printf("Tx Status : %d", msgIndex)
 
-				if txValue.DelegatorAddress == cfg.AccountAddress || txValue.ValidatorAddress == cfg.ValOperatorAddress {
+		if msgIndex == 0 {
+			if len(tx.Tx.Value.Msg) != 0 {
+				txType := tx.Tx.Value.Msg[0].Type
+				txValue := tx.Tx.Value.Msg[0].Value
+				log.Println("txType: ", txType)
 
-					_ = SendTelegramAlert(fmt.Sprintf("Undelegation alert: Undelegated %s from your validator. %s", amountInAKT, votingPowerMsg), cfg)
-					_ = SendEmailAlert(fmt.Sprintf("Undelegation alert: Undelegated %s from your validator. %s", amountInAKT, votingPowerMsg), cfg)
-				}
-			} else if txType == "cosmos-sdk/MsgBeginRedelegate" {
-				amount := txValue.Amount.Amount
-				amountInAKT := ConvertToAKT(amount)
+				// Calling function to get voting power change alert msg
+				votingPowerMsg := GetValidatorVotingPower(ops, cfg, c)
 
-				if txValue.ValidatorSrcAddress == cfg.ValOperatorAddress {
-					_ = SendTelegramAlert(fmt.Sprintf("Reelegation alert: Redelegated %s from validator. %s", amountInAKT, votingPowerMsg), cfg)
-					_ = SendEmailAlert(fmt.Sprintf("Redelegation alert: Redelegated %s from validator. %s ", amountInAKT, votingPowerMsg), cfg)
-				}
+				if txType == "cosmos-sdk/MsgDelegate" {
+					amount := txValue.Amount.Amount
+					amountInAKT := ConvertToAKT(amount)
+					delegatorAddress := txValue.DelegatorAddress
 
-				if txValue.ValidatorDstAddress == cfg.ValOperatorAddress {
-					_ = SendTelegramAlert(fmt.Sprintf("Reelegation alert: Redelegated %s to validator. %s", amountInAKT, votingPowerMsg), cfg)
-					_ = SendEmailAlert(fmt.Sprintf("Redelegation alert: Redelegated %s to validator. %s ", amountInAKT, votingPowerMsg), cfg)
+					if txValue.ValidatorAddress == cfg.ValOperatorAddress {
+						_ = SendTelegramAlert(fmt.Sprintf("Delegation alert: you have a new delegation %s from %s and %s ", amountInAKT, delegatorAddress, votingPowerMsg), cfg)
+						_ = SendEmailAlert(fmt.Sprintf("Delegation alert: you have a new delegation %s from %s and %s", amountInAKT, delegatorAddress, votingPowerMsg), cfg)
+					}
+				} else if txType == "cosmos-sdk/MsgUndelegate" {
+					amount := txValue.Amount.Amount
+					amountInAKT := ConvertToAKT(amount)
+
+					if txValue.DelegatorAddress == cfg.AccountAddress || txValue.ValidatorAddress == cfg.ValOperatorAddress {
+
+						_ = SendTelegramAlert(fmt.Sprintf("Undelegation alert: Undelegated %s from your validator. %s", amountInAKT, votingPowerMsg), cfg)
+						_ = SendEmailAlert(fmt.Sprintf("Undelegation alert: Undelegated %s from your validator. %s", amountInAKT, votingPowerMsg), cfg)
+					}
+				} else if txType == "cosmos-sdk/MsgBeginRedelegate" {
+					amount := txValue.Amount.Amount
+					amountInAKT := ConvertToAKT(amount)
+
+					if txValue.ValidatorSrcAddress == cfg.ValOperatorAddress {
+						_ = SendTelegramAlert(fmt.Sprintf("Reelegation alert: Redelegated %s from validator. %s", amountInAKT, votingPowerMsg), cfg)
+						_ = SendEmailAlert(fmt.Sprintf("Redelegation alert: Redelegated %s from validator. %s ", amountInAKT, votingPowerMsg), cfg)
+					}
+
+					if txValue.ValidatorDstAddress == cfg.ValOperatorAddress {
+						_ = SendTelegramAlert(fmt.Sprintf("Reelegation alert: Redelegated %s to validator. %s", amountInAKT, votingPowerMsg), cfg)
+						_ = SendEmailAlert(fmt.Sprintf("Redelegation alert: Redelegated %s to validator. %s ", amountInAKT, votingPowerMsg), cfg)
+					}
 				}
 			}
+		} else {
+			return
 		}
 	}
 }
