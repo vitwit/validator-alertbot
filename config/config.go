@@ -52,6 +52,12 @@ type (
 		NumPeersThreshold int64  `mapstructure:"num_peers_threshold"`
 	}
 
+	// MissedBlocksAlert is about sending alerts of missed blocks based on configuration
+	MissedBlocksAlert struct {
+		EnableAlert           string `mapstructure:"enable_alert"`
+		MissedBlocksThreshold int64  `mapstructure:"missed_blocks_threshold"`
+	}
+
 	// Config defines all the app configurations
 	Config struct {
 		ValidatorRPCEndpoint string            `mapstructure:"validator_rpc_endpoint"`
@@ -71,6 +77,7 @@ type (
 		PeersAlert           PeersAlert        `mapstructure:"Peers_alert"`
 		AccountAddress       string            `mapstructure:"account_addr"`
 		BalanceChangeAlerts  string            `mapstructure:"balance_change_alert"`
+		MissedBlocksAlert    MissedBlocksAlert `mapstructure:"missed_blocks_alert"`
 	}
 )
 

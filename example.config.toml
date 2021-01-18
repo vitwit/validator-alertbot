@@ -50,6 +50,12 @@ voting_power_threshold = 50
 enable_alert = "yes"
 num_peers_threshold = 0
 
+#  Configure the threshold to get an alert of continous missed blocks.
+#If you want to receive this alert make enable_alert to yes otherwise no
+[missed_blocks_alert]
+enable_alert = "yes"
+missed_blocks_threshold = 4
+
 # Configure telegarm bot details to  get alerts
 [telegram]
 tg_chat_id = 2282431205

@@ -29,12 +29,12 @@ func InitTargets(cfg *config.Config) *Targets {
 	return &Targets{List: []Target{
 		{
 			ExecutionType: "http",
-			Name:          "Send missed blocka lerts",
+			Name:          "Send missed blocks lerts",
 			HTTPOptions: HTTPOptions{
 				Endpoint: cfg.ExternalRPC + "/status",
 				Method:   http.MethodGet,
 			},
-			Func:        SendSingleMissedBlockAlert,
+			Func:        MissedBlocks,
 			ScraperRate: cfg.Scraper.Rate,
 		},
 		{
