@@ -20,12 +20,14 @@ func SendSingleMissedBlockAlert(cfg *config.Config, c client.Client, addrExists 
 	}
 
 	if !addrExists {
-		if strings.ToUpper(cfg.MissedBlocksAlert.EnableAlert) == "YES" && cfg.MissedBlocksAlert.MissedBlocksThreshold == 1 {
-			_ = SendTelegramAlert(fmt.Sprintf("%s validator missed a block at block height %s", cfg.ValidatorName, cbh), cfg)
-			_ = SendEmailAlert(fmt.Sprintf("%s validator missed a block at block height %s", cfg.ValidatorName, cbh), cfg)
-			log.Println("Sent missed block alerting")
+		if cfg.MissedBlocksAlert.MissedBlocksThreshold == 1 {
+			if strings.ToUpper(cfg.MissedBlocksAlert.EnableAlert) == "YES" {
+				_ = SendTelegramAlert(fmt.Sprintf("%s validator missed a block at block height %s", cfg.ValidatorName, cbh), cfg)
+				_ = SendEmailAlert(fmt.Sprintf("%s validator missed a block at block height %s", cfg.ValidatorName, cbh), cfg)
+				log.Println("Sent missed block alerting")
+			}
+			_ = writeToInfluxDb(c, bp, "vab_missed_blocks", map[string]string{}, map[string]interface{}{"block_height": cbh, "current_height": cbh})
 		}
-		_ = writeToInfluxDb(c, bp, "vab_missed_blocks", map[string]string{}, map[string]interface{}{"block_height": cbh, "current_height": cbh})
 	}
 
 	// Calling function to check validator jailed status
