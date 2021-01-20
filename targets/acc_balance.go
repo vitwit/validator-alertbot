@@ -23,14 +23,14 @@ func GetAccountInfo(ops HTTPOptions, cfg *config.Config, c client.Client) {
 
 	resp, err := HitHTTPTarget(ops)
 	if err != nil {
-		log.Printf("Error: %v", err)
+		log.Printf("Error in get account info: %v", err)
 		return
 	}
 
 	var accResp AccountResp
 	err = json.Unmarshal(resp.Body, &accResp)
 	if err != nil {
-		log.Printf("Error: %v", err)
+		log.Printf("Error while unmarshelling AccountResp: %v", err)
 		return
 	}
 

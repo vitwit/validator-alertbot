@@ -27,7 +27,7 @@ func GetNetInfo(ops HTTPOptions, cfg *config.Config, c client.Client) {
 	var ni NetInfo
 	err = json.Unmarshal(resp.Body, &ni)
 	if err != nil {
-		log.Printf("Error: %v", err)
+		log.Printf("Error while unamrshelling NetInfo: %v", err)
 		return
 	}
 

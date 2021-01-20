@@ -49,14 +49,14 @@ func MissedBlocks(ops HTTPOptions, cfg *config.Config, c client.Client) {
 
 	resp, err := HitHTTPTarget(ops)
 	if err != nil {
-		log.Printf("Error: %v", err)
+		log.Printf("Error in missed blocks: %v", err)
 		return
 	}
 
 	var networkLatestBlock NetworkLatestBlock
 	err = json.Unmarshal(resp.Body, &networkLatestBlock)
 	if err != nil {
-		log.Printf("Error: %v", err)
+		log.Printf("Error while unmarshelling NetworkLatestBlock : %v", err)
 		return
 	}
 

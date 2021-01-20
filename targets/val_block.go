@@ -26,14 +26,14 @@ func GetValStatus(ops HTTPOptions, cfg *config.Config, c client.Client) string {
 	})
 
 	if err != nil {
-		log.Printf("Error: %v", err)
+		log.Printf("Error in get val status: %v", err)
 		return ""
 	}
 
 	var status ValidatorRPCStatus
 	err = json.Unmarshal(resp.Body, &status)
 	if err != nil {
-		log.Printf("Error: %v", err)
+		log.Printf("Error while unmarshelling ValidatorRPCStatus : %v", err)
 		return ""
 	}
 

@@ -18,14 +18,14 @@ func GetValidatorVoted(LCDEndpoint string, proposalID string, accountAddress str
 	proposalURL := LCDEndpoint + "/gov/proposals/" + proposalID + "/votes"
 	res, err := http.Get(proposalURL)
 	if err != nil {
-		log.Printf("Error: %v", err)
+		log.Printf("Error in get proposal votes: %v", err)
 	}
 
 	var voters ProposalVoters
 	if res != nil {
 		body, err := ioutil.ReadAll(res.Body)
 		if err != nil {
-			fmt.Println("Error while reading resp body ", err)
+			log.Printf("Error while reading resp of proposal voters : %v ", err)
 		}
 		_ = json.Unmarshal(body, &voters)
 	}
@@ -44,7 +44,7 @@ func SendVotingPeriodProposalAlerts(LCDEndpoint string, accountAddress string, c
 	proposalURL := LCDEndpoint + "/gov/proposals?status=voting_period"
 	res, err := http.Get(proposalURL)
 	if err != nil {
-		log.Printf("Error: %v", err)
+		log.Printf("Error in get voting_period proposals: %v", err)
 		return err
 	}
 
@@ -52,7 +52,7 @@ func SendVotingPeriodProposalAlerts(LCDEndpoint string, accountAddress string, c
 	if res != nil {
 		body, err := ioutil.ReadAll(res.Body)
 		if err != nil {
-			fmt.Println("Error while reading resp body ", err)
+			log.Printf("Error while reading resp of proposals : %v ", err)
 			return err
 		}
 		_ = json.Unmarshal(body, &p)
@@ -62,7 +62,7 @@ func SendVotingPeriodProposalAlerts(LCDEndpoint string, accountAddress string, c
 		proposalVotesURL := LCDEndpoint + "/gov/proposals/" + proposal.ID + "/votes"
 		res, err := http.Get(proposalVotesURL)
 		if err != nil {
-			log.Printf("Error: %v", err)
+			log.Printf("Error in get proposal votes: %v", err)
 			return err
 		}
 
@@ -70,7 +70,7 @@ func SendVotingPeriodProposalAlerts(LCDEndpoint string, accountAddress string, c
 		if res != nil {
 			body, err := ioutil.ReadAll(res.Body)
 			if err != nil {
-				fmt.Println("Error while reading resp body ", err)
+				log.Printf("Error while reading resp of proposal voters : %v", err)
 				return err
 			}
 			_ = json.Unmarshal(body, &voters)
@@ -106,14 +106,14 @@ func GetValidatorDeposited(LCDEndpoint string, proposalID string, accountAddress
 	proposalURL := LCDEndpoint + "/gov/proposals/" + proposalID + "/deposits"
 	res, err := http.Get(proposalURL)
 	if err != nil {
-		log.Printf("Error: %v", err)
+		log.Printf("Error in get deposit proposals: %v", err)
 	}
 
 	var depositors Depositors
 	if res != nil {
 		body, err := ioutil.ReadAll(res.Body)
 		if err != nil {
-			fmt.Println("Error while reading resp body ", err)
+			log.Printf("Error while reading resp of depositors : %v ", err)
 		}
 		_ = json.Unmarshal(body, &depositors)
 	}
@@ -275,9 +275,9 @@ func DeleteDepoitEndProposals(cfg *config.Config, c client.Client, p Proposals) 
 func GetUserDateFormat(timeToConvert string) string {
 	time, err := time.Parse(time.RFC3339, timeToConvert)
 	if err != nil {
-		fmt.Println("Error while converting date ", err)
+		log.Printf("Error while converting date : %v ", err)
 	}
 	date := time.Format("Mon Jan _2 15:04:05 2006")
-	fmt.Println("Converted time into date format : ", date)
+	log.Printf("Converted time into date format : %v ", date)
 	return date
 }

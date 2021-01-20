@@ -20,14 +20,14 @@ func GetRewradsAndCommission(ops HTTPOptions, cfg *config.Config, c client.Clien
 
 	resp, err := HitHTTPTarget(ops)
 	if err != nil {
-		log.Printf("Error: %v", err)
+		log.Printf("Error in get rewards and commission: %v", err)
 		return
 	}
 
 	var rewardsResp DistributionRewards
 	err = json.Unmarshal(resp.Body, &rewardsResp)
 	if err != nil {
-		log.Printf("Error: %v", err)
+		log.Printf("Error in DistributionRewards: %v", err)
 		return
 	}
 

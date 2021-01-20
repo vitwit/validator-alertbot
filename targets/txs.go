@@ -15,14 +15,14 @@ import (
 func TxAlerts(ops HTTPOptions, cfg *config.Config, c client.Client) {
 	resp, err := HitHTTPTarget(ops)
 	if err != nil {
-		log.Printf("Error: %v", err)
+		log.Printf("Error in get tx: %v", err)
 		return
 	}
 
 	var networkLatestBlock NetworkLatestBlock
 	err = json.Unmarshal(resp.Body, &networkLatestBlock)
 	if err != nil {
-		log.Printf("Error: %v", err)
+		log.Printf("Error while unmarshelling NetworkLatestBlock: %v", err)
 		return
 	}
 
@@ -41,7 +41,7 @@ func TxAlerts(ops HTTPOptions, cfg *config.Config, c client.Client) {
 	var b BlockResponse
 	err = json.Unmarshal(resp.Body, &b)
 	if err != nil {
-		log.Printf("Error: %v", err)
+		log.Printf("Error while unmarshelling BlockResponse: %v", err)
 		return
 	}
 
@@ -65,7 +65,7 @@ func TxAlerts(ops HTTPOptions, cfg *config.Config, c client.Client) {
 		var tx TxHashResp
 		err = json.Unmarshal(resp.Body, &tx)
 		if err != nil {
-			log.Printf("Error: %v", err)
+			log.Printf("Error while unmarshelling TxHashResp: %v", err)
 			return
 		}
 

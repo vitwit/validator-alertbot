@@ -21,14 +21,14 @@ func GetNetworkLatestBlock(ops HTTPOptions, cfg *config.Config, c client.Client)
 
 	resp, err := HitHTTPTarget(ops)
 	if err != nil {
-		log.Printf("Error: %v", err)
+		log.Printf("Error in get network latest block: %v", err)
 		return
 	}
 
 	var networkBlock NetworkLatestBlock
 	err = json.Unmarshal(resp.Body, &networkBlock)
 	if err != nil {
-		log.Printf("Error: %v", err)
+		log.Printf("Error while unamrshelling NetworkLatestBlock: %v", err)
 		return
 	}
 

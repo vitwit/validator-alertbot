@@ -21,14 +21,14 @@ func ValidatorStatusAlert(ops HTTPOptions, cfg *config.Config, c client.Client) 
 
 	resp, err := HitHTTPTarget(ops)
 	if err != nil {
-		log.Printf("Error: %v", err)
+		log.Printf("Error in get validator status: %v", err)
 		return
 	}
 
 	var validatorResp ValidatorResp
 	err = json.Unmarshal(resp.Body, &validatorResp)
 	if err != nil {
-		log.Printf("Error: %v", err)
+		log.Printf("Error while unmarshelling ValidatorResp: %v", err)
 		return
 	}
 
@@ -77,14 +77,14 @@ func CheckValidatorJailed(cfg *config.Config) error {
 
 	resp, err := HitHTTPTarget(ops)
 	if err != nil {
-		log.Printf("Error: %v", err)
+		log.Printf("Error in check validator jailed method: %v", err)
 		return err
 	}
 
 	var validatorResp ValidatorResp
 	err = json.Unmarshal(resp.Body, &validatorResp)
 	if err != nil {
-		log.Printf("Error: %v", err)
+		log.Printf("Error while unmarshelling ValidatorResp: %v", err)
 		return err
 	}
 
