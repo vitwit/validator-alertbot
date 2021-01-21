@@ -41,10 +41,18 @@ func GetAccountInfo(ops HTTPOptions, cfg *config.Config, c client.Client) {
 
 		if prevAmount != amount {
 			if strings.ToUpper(cfg.BalanceChangeAlerts) == "YES" {
-				amount1 := ConvertToAKT(prevAmount)
-				amount2 := ConvertToAKT(amount)
-				_ = SendTelegramAlert(fmt.Sprintf("Your account balance has changed from  %s to %s", amount1, amount2), cfg)
-				_ = SendEmailAlert(fmt.Sprintf("Your account balance has changed from  %s to %s", amount1, amount2), cfg)
+				amount1 := ConvertToFolat64(prevAmount)
+				amount2 := ConvertToFolat64(amount)
+				balChange := amount1 - amount2
+				if balChange < 0 {
+					balChange = -(balChange)
+				}
+				if balChange > cfg.DelegationAlerts.AccBalanceChangeThreshold {
+					a1 := convertToCommaSeparated(fmt.Sprintf("%f", amount1)) + "AKT"
+					a2 := convertToCommaSeparated(fmt.Sprintf("%f", amount2)) + "AKT"
+					_ = SendTelegramAlert(fmt.Sprintf("Your account balance has changed from  %s to %s", a1, a2), cfg)
+					_ = SendEmailAlert(fmt.Sprintf("Your account balance has changed from  %s to %s", a1, a2), cfg)
+				}
 			}
 		}
 
@@ -90,4 +98,19 @@ func convertToCommaSeparated(amt string) string {
 	}
 	p := message.NewPrinter(language.English)
 	return p.Sprintf("%d", a)
+}
+
+// ConvertToFolat64 converts balance from string to float64
+func ConvertToFolat64(balance string) float64 {
+	bal, _ := strconv.ParseFloat(balance, 64)
+
+	a1 := bal / math.Pow(10, 6)
+	amount := fmt.Sprintf("%.6f", a1)
+
+	a, err := strconv.ParseFloat(amount, 64)
+	if err != nil {
+		log.Printf("Error while converting string to folat64 : %v", err)
+	}
+
+	return a
 }

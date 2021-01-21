@@ -91,10 +91,14 @@ func TxAlerts(ops HTTPOptions, cfg *config.Config, c client.Client) {
 					amountInAKT := ConvertToAKT(amount)
 					delegatorAddress := txValue.DelegatorAddress
 
-					if txValue.ValidatorAddress == cfg.ValOperatorAddress {
-						_ = SendTelegramAlert(fmt.Sprintf("Delegation alert: you have a new delegation %s from %s and %s ", amountInAKT, delegatorAddress, votingPowerMsg), cfg)
-						_ = SendEmailAlert(fmt.Sprintf("Delegation alert: you have a new delegation %s from %s and %s", amountInAKT, delegatorAddress, votingPowerMsg), cfg)
+					bal := ConvertToFolat64(amount)
+					if bal > cfg.DelegationAlerts.DelegationAmountThreshold {
+						if txValue.ValidatorAddress == cfg.ValOperatorAddress {
+							_ = SendTelegramAlert(fmt.Sprintf("Delegation alert: you have a new delegation %s from %s and %s ", amountInAKT, delegatorAddress, votingPowerMsg), cfg)
+							_ = SendEmailAlert(fmt.Sprintf("Delegation alert: you have a new delegation %s from %s and %s", amountInAKT, delegatorAddress, votingPowerMsg), cfg)
+						}
 					}
+
 				} else if txType == "cosmos-sdk/MsgUndelegate" {
 					amount := txValue.Amount.Amount
 					amountInAKT := ConvertToAKT(amount)
@@ -109,12 +113,12 @@ func TxAlerts(ops HTTPOptions, cfg *config.Config, c client.Client) {
 					amountInAKT := ConvertToAKT(amount)
 
 					if txValue.ValidatorSrcAddress == cfg.ValOperatorAddress {
-						_ = SendTelegramAlert(fmt.Sprintf("Reelegation alert: Redelegated %s from validator. %s", amountInAKT, votingPowerMsg), cfg)
+						_ = SendTelegramAlert(fmt.Sprintf("Redelegation alert: Redelegated %s from validator. %s", amountInAKT, votingPowerMsg), cfg)
 						_ = SendEmailAlert(fmt.Sprintf("Redelegation alert: Redelegated %s from validator. %s ", amountInAKT, votingPowerMsg), cfg)
 					}
 
 					if txValue.ValidatorDstAddress == cfg.ValOperatorAddress {
-						_ = SendTelegramAlert(fmt.Sprintf("Reelegation alert: Redelegated %s to validator. %s", amountInAKT, votingPowerMsg), cfg)
+						_ = SendTelegramAlert(fmt.Sprintf("Redelegation alert: Redelegated %s to validator. %s", amountInAKT, votingPowerMsg), cfg)
 						_ = SendEmailAlert(fmt.Sprintf("Redelegation alert: Redelegated %s to validator. %s ", amountInAKT, votingPowerMsg), cfg)
 					}
 				}

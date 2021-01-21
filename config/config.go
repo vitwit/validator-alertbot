@@ -58,6 +58,11 @@ type (
 		MissedBlocksThreshold int64  `mapstructure:"missed_blocks_threshold"`
 	}
 
+	DelegationAlerts struct {
+		DelegationAmountThreshold float64 `mapstructure:"delegation_amount_threshold"`
+		AccBalanceChangeThreshold float64 `mapstructure:"acc_balance_change_threshold"`
+	}
+
 	// Config defines all the app configurations
 	Config struct {
 		ValidatorRPCEndpoint string            `mapstructure:"validator_rpc_endpoint"`
@@ -78,6 +83,7 @@ type (
 		AccountAddress       string            `mapstructure:"account_addr"`
 		BalanceChangeAlerts  string            `mapstructure:"balance_change_alert"`
 		MissedBlocksAlert    MissedBlocksAlert `mapstructure:"missed_blocks_alert"`
+		DelegationAlerts     DelegationAlerts  `mapstructure:"delegation_alerts"`
 	}
 )
 

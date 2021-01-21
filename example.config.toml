@@ -56,6 +56,10 @@ num_peers_threshold = 0
 enable_alert = "yes"
 missed_blocks_threshold = 4
 
+[delegation_alerts]
+delegation_amount_threshold = 6.98
+acc_balance_change_threshold = 6.98
+
 # Configure telegarm bot details to  get alerts
 [telegram]
 tg_chat_id = 2282431205
