@@ -276,13 +276,6 @@ type (
 					Amount []interface{} `json:"amount"`
 					Gas    string        `json:"gas"`
 				} `json:"fee"`
-				Signatures []struct {
-					PubKey struct {
-						Type  string `json:"type"`
-						Value string `json:"value"`
-					} `json:"pub_key"`
-					Signature string `json:"signature"`
-				} `json:"signatures"`
 				Memo string `json:"memo"`
 			} `json:"value"`
 		} `json:"tx"`
