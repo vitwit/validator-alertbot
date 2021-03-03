@@ -3,6 +3,7 @@ package targets
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"strings"
 	"validator-alertbot/config"
 
@@ -45,6 +46,8 @@ func TelegramAlerting(ops HTTPOptions, cfg *config.Config, c client.Client) {
 			msgToSend = GetAccountBal(cfg, c)
 		} else if update.Message.Text == "/rewards" {
 			msgToSend = GetValRewards(cfg, c)
+		} else if update.Message.Text == "/rpc_status" {
+			msgToSend = GetEndPointsStatus(cfg)
 		} else if update.Message.Text == "/list" {
 			msgToSend = GetHelp()
 		} else {
@@ -69,11 +72,57 @@ func TelegramAlerting(ops HTTPOptions, cfg *config.Config, c client.Client) {
 	}
 }
 
+// GetEndPointsStatus retsurns status of the configured endpoints i.e, lcd, val and external rpc.
+func GetEndPointsStatus(cfg *config.Config) string {
+	ops := HTTPOptions{
+		Endpoint: cfg.ExternalRPC + "/status",
+		Method:   http.MethodGet,
+	}
+	var msg string
+
+	_, err := HitHTTPTarget(ops)
+	if err != nil {
+		log.Printf("Error in external rpc: %v", err)
+		// _ = SendTelegramAlert(fmt.Sprintf("⛔⛔ Unreachable to EXTERNAL RPC :: %s and the ERROR is : %v", ops.Endpoint, err.Error()), cfg)
+		msg = msg + fmt.Sprintf("⛔⛔ Unreachable to EXTERNAL RPC :: %s and the ERROR is : %v\n\n", ops.Endpoint, err.Error())
+	} else {
+		msg = msg + fmt.Sprintf("EXTERNAL RPC  ✅\n\n")
+	}
+
+	ops = HTTPOptions{
+		Endpoint: cfg.ValidatorRPCEndpoint + "/net_info?",
+		Method:   http.MethodGet,
+	}
+
+	_, err = HitHTTPTarget(ops)
+	if err != nil {
+		log.Printf("Error in validator rpc: %v", err)
+		msg = msg + fmt.Sprintf("⛔⛔ Unreachable to VALIDATOR RPC :: %s and the ERROR is : %v\n\n", ops.Endpoint, err.Error())
+	} else {
+		msg = msg + fmt.Sprintf("VALIDATOR RPC  ✅\n\n")
+	}
+
+	ops = HTTPOptions{
+		Endpoint: cfg.LCDEndpoint + "/node_info",
+		Method:   http.MethodGet,
+	}
+
+	_, err = HitHTTPTarget(ops)
+	if err != nil {
+		log.Printf("Error in lcd endpoint: %v", err)
+		msg = msg + fmt.Sprintf("⛔⛔ Unreachable to LCD ENDPOINT :: %s and the ERROR is : %v\n\n", ops.Endpoint, err.Error())
+	} else {
+		msg = msg + fmt.Sprintf("LCD ENDPOINT  ✅\n\n")
+	}
+
+	return msg
+}
+
 // GetHelp returns the msg to show for /help
 func GetHelp() string {
 	msg := "List of available commands\n /status - returns validator status, voting power, current block height " +
 		"and network block height\n /peers - returns number of connected peers\n /node - return status of caught-up\n" +
-		"/balance - returns the current balance of your account \n /rewards - returns validator rewards + commission in AKT\n /list - list out the available commands"
+		"/balance - returns the current balance of your account \n /rewards - returns validator rewards + commission in AKT\n /rpc_status - returns the status of lcd, validator and exteral endpoint\n /list - list out the available commands"
 
 	return msg
 }
