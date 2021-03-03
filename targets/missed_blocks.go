@@ -50,6 +50,7 @@ func MissedBlocks(ops HTTPOptions, cfg *config.Config, c client.Client) {
 	resp, err := HitHTTPTarget(ops)
 	if err != nil {
 		log.Printf("Error in missed blocks: %v", err)
+		_ = SendTelegramAlert(fmt.Sprintf("⛔⛔ Unreachable to EXTERNAL RPC :: %s and the ERROR is : %v", ops.Endpoint, err.Error()), cfg)
 		return
 	}
 
