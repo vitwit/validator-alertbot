@@ -108,6 +108,12 @@ func InitTargets(cfg *config.Config) *Targets {
 			ScraperRate: cfg.Scraper.Rate,
 		},
 		{
+			ExecutionType: "http",
+			Name:          "Alert about endpoints status",
+			Func:          GetEndpointsStatus,
+			ScraperRate:   "600s",
+		},
+		{
 			ExecutionType: "Telegram command",
 			Name:          "command based alerts",
 			Func:          TelegramAlerting,
