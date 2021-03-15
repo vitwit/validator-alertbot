@@ -180,8 +180,35 @@ type (
 
 	// Proposals struct holds result of array of proposals
 	Proposals struct {
-		Height string           `json:"height"`
-		Result []ProposalResult `json:"result"`
+		Proposals []struct {
+			ProposalID string `json:"proposal_id"`
+			Content    struct {
+				Type        string `json:"@type"`
+				Title       string `json:"title"`
+				Description string `json:"description"`
+				Changes     []struct {
+					Subspace string `json:"subspace"`
+					Key      string `json:"key"`
+					Value    string `json:"value"`
+				} `json:"changes"`
+			} `json:"content,omitempty"`
+			Status           string `json:"status"`
+			FinalTallyResult struct {
+				Yes        string `json:"yes"`
+				Abstain    string `json:"abstain"`
+				No         string `json:"no"`
+				NoWithVeto string `json:"no_with_veto"`
+			} `json:"final_tally_result"`
+			SubmitTime     string `json:"submit_time"`
+			DepositEndTime string `json:"deposit_end_time"`
+			TotalDeposit   []struct {
+				Denom  string `json:"denom"`
+				Amount string `json:"amount"`
+			} `json:"total_deposit"`
+			VotingStartTime string `json:"voting_start_time"`
+			VotingEndTime   string `json:"voting_end_time"`
+		} `json:"proposals"`
+		Pagination interface{} `json:"pagination"`
 	}
 
 	// ProposalVoters struct holds the parameters of proposal voters
@@ -196,15 +223,15 @@ type (
 
 	// Depositors struct which holds the parameters of depositors
 	Depositors struct {
-		Height string `json:"height"`
-		Result []struct {
+		Deposits []struct {
 			ProposalID string `json:"proposal_id"`
 			Depositor  string `json:"depositor"`
 			Amount     []struct {
 				Denom  string `json:"denom"`
 				Amount string `json:"amount"`
 			} `json:"amount"`
-		} `json:"result"`
+		} `json:"deposits"`
+		Pagination interface{} `json:"pagination"`
 	}
 
 	// AccountBalance struct which holds the parameters of an account amount
