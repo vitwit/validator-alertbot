@@ -27,18 +27,15 @@ type (
 
 	ValidatorResp struct {
 		Validator struct {
-			OperatorAddress string `json:"operator_address"`
-			ConsensusPubkey struct {
-				Type string `json:"@type"`
-				Key  string `json:"key"`
-			} `json:"consensus_pubkey"`
-			Jailed            bool      `json:"jailed"`
-			Status            string    `json:"status"`
-			Tokens            string    `json:"tokens"`
-			DelegatorShares   string    `json:"delegator_shares"`
-			UnbondingHeight   string    `json:"unbonding_height"`
-			UnbondingTime     time.Time `json:"unbonding_time"`
-			MinSelfDelegation string    `json:"min_self_delegation"`
+			OperatorAddress   string      `json:"operator_address"`
+			ConsensusPubkey   interface{} `json:"consensus_pubkey"`
+			Jailed            bool        `json:"jailed"`
+			Status            string      `json:"status"`
+			Tokens            string      `json:"tokens"`
+			DelegatorShares   string      `json:"delegator_shares"`
+			UnbondingHeight   string      `json:"unbonding_height"`
+			UnbondingTime     time.Time   `json:"unbonding_time"`
+			MinSelfDelegation string      `json:"min_self_delegation"`
 		} `json:"validator"`
 	}
 

@@ -21,7 +21,7 @@ func GetValidatorVotingPower(ops HTTPOptions, cfg *config.Config, c client.Clien
 	}
 
 	resp, err := HitHTTPTarget(HTTPOptions{
-		Endpoint: cfg.LCDEndpoint + "/staking/validators/" + cfg.ValOperatorAddress,
+		Endpoint: cfg.LCDEndpoint + "/cosmos/staking/v1beta1/validators/" + cfg.ValOperatorAddress,
 		Method:   http.MethodGet,
 	})
 

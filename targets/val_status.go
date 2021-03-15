@@ -71,7 +71,7 @@ func ValidatorStatusAlert(ops HTTPOptions, cfg *config.Config, c client.Client) 
 func CheckValidatorJailed(cfg *config.Config) error {
 	log.Println("Coming inside jailed alerting")
 	ops := HTTPOptions{
-		Endpoint: cfg.LCDEndpoint + "/staking/validators/" + cfg.ValOperatorAddress,
+		Endpoint: cfg.LCDEndpoint + "/cosmos/staking/v1beta1/validators/" + cfg.ValOperatorAddress,
 		Method:   http.MethodGet,
 	}
 
