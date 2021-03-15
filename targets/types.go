@@ -212,14 +212,11 @@ type (
 
 	// AccountBalance struct which holds the parameters of an account amount
 	AccountBalance struct {
-		Denom  string `json:"denom"`
-		Amount string `json:"amount"`
-	}
-
-	// AccountResp struct which holds the response paramaters of an account
-	AccountResp struct {
-		Height string           `json:"height"`
-		Result []AccountBalance `json:"result"`
+		Balances []struct {
+			Denom  string `json:"denom"`
+			Amount string `json:"amount"`
+		} `json:"balances"`
+		Pagination interface{} `json:"pagination"`
 	}
 
 	// TxHashResp is a struct which holds the response of txhash response

@@ -27,16 +27,16 @@ func GetAccountInfo(ops HTTPOptions, cfg *config.Config, c client.Client) {
 		return
 	}
 
-	var accResp AccountResp
+	var accResp AccountBalance
 	err = json.Unmarshal(resp.Body, &accResp)
 	if err != nil {
 		log.Printf("Error while unmarshelling AccountResp: %v", err)
 		return
 	}
 
-	if len(accResp.Result) > 0 {
-		amount := accResp.Result[0].Amount
-		denom := accResp.Result[0].Denom
+	if len(accResp.Balances) > 0 {
+		amount := accResp.Balances[0].Amount
+		denom := accResp.Balances[0].Denom
 		prevAmount := GetAccountBalFromDb(cfg, c)
 
 		if prevAmount != amount {
