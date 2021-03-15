@@ -48,8 +48,9 @@ func TxAlerts(ops HTTPOptions, cfg *config.Config, c client.Client) {
 	txs := b.Result.Block.Data.Txs
 	for _, t := range txs {
 		txHash := GenerateHash(t)
+		log.Printf("tx hash.. : %s", txHash)
 		resp, err = HitHTTPTarget(HTTPOptions{
-			Endpoint: cfg.LCDEndpoint + "/txs/" + txHash,
+			Endpoint: cfg.LCDEndpoint + "/cosmos/tx/v1beta1/txs/" + txHash,
 			Method:   "GET",
 		})
 		if err != nil {
@@ -71,22 +72,23 @@ func TxAlerts(ops HTTPOptions, cfg *config.Config, c client.Client) {
 
 		var msgIndex = 1
 
-		if len(tx.Logs) != 0 {
-			msgIndex = tx.Logs[0].MsgIndex
+		if len(tx.TxResponse.Logs) != 0 {
+			msgIndex = tx.TxResponse.Logs[0].MsgIndex // check tx status, If it's 0 then valid otherwise not
 		}
 
 		log.Printf("Tx Status : %d", msgIndex)
 
 		if msgIndex == 0 {
-			if len(tx.Tx.Value.Msg) != 0 {
-				txType := tx.Tx.Value.Msg[0].Type
-				txValue := tx.Tx.Value.Msg[0].Value
-				log.Println("txType: ", txType)
+			if len(tx.TxResponse.Tx.Body.Messages) != 0 {
+				txType := tx.TxResponse.Tx.Body.Messages[0].Type
+				txValue := tx.TxResponse.Tx.Body.Messages[0]
+				log.Printf("txType: %s", txType)
 
 				// Calling function to get voting power change alert msg
 				votingPowerMsg := GetValidatorVotingPower(ops, cfg, c)
 
-				if txType == "cosmos-sdk/MsgDelegate" {
+				if txType == "/cosmos.staking.v1beta1.MsgDelegate" {
+
 					amount := txValue.Amount.Amount
 					amountInAKT := ConvertToAKT(amount)
 					delegatorAddress := txValue.DelegatorAddress
@@ -98,8 +100,7 @@ func TxAlerts(ops HTTPOptions, cfg *config.Config, c client.Client) {
 							_ = SendEmailAlert(fmt.Sprintf("Delegation alert: you have a new delegation %s from %s and %s", amountInAKT, delegatorAddress, votingPowerMsg), cfg)
 						}
 					}
-
-				} else if txType == "cosmos-sdk/MsgUndelegate" {
+				} else if txType == "/cosmos.staking.v1beta1.MsgUndelegate" {
 					amount := txValue.Amount.Amount
 					amountInAKT := ConvertToAKT(amount)
 
@@ -108,7 +109,7 @@ func TxAlerts(ops HTTPOptions, cfg *config.Config, c client.Client) {
 						_ = SendTelegramAlert(fmt.Sprintf("Undelegation alert: Undelegated %s from your validator. %s", amountInAKT, votingPowerMsg), cfg)
 						_ = SendEmailAlert(fmt.Sprintf("Undelegation alert: Undelegated %s from your validator. %s", amountInAKT, votingPowerMsg), cfg)
 					}
-				} else if txType == "cosmos-sdk/MsgBeginRedelegate" {
+				} else if txType == "/cosmos.staking.v1beta1.MsgBeginRedelegate" {
 					amount := txValue.Amount.Amount
 					amountInAKT := ConvertToAKT(amount)
 

@@ -56,14 +56,14 @@ type (
 					Evidence interface{} `json:"evidence"`
 				} `json:"evidence"`
 				LastCommit struct {
-					Height     string      `json:"height"`
-					Round      string      `json:"round"`
+					Height string `json:"height"`
+					// Round      string      `json:"round"`
 					BlockID    interface{} `json:"block_id"`
 					Signatures []struct {
-						BlockIDFlag      int       `json:"block_id_flag"`
-						ValidatorAddress string    `json:"validator_address"`
-						Timestamp        time.Time `json:"timestamp"`
-						Signature        string    `json:"signature"`
+						// BlockIDFlag      int       `json:"block_id_flag"`
+						ValidatorAddress string `json:"validator_address"`
+						Timestamp        string `json:"timestamp"`
+						Signature        string `json:"signature"`
 					} `json:"signatures"`
 				} `json:"last_commit"`
 			} `json:"block"`
@@ -222,21 +222,29 @@ type (
 		Result []AccountBalance `json:"result"`
 	}
 
+	// TxHashResp is a struct which holds the response of txhash response
 	TxHashResp struct {
-		Height string `json:"height"`
-		Txhash string `json:"txhash"`
-		RawLog string `json:"raw_log"`
-		Logs   []struct {
-			MsgIndex int         `json:"msg_index"`
-			Log      string      `json:"log"`
-			Events   interface{} `json:"events"`
-		} `json:"logs"`
-		Tx struct {
-			Type  string `json:"type"`
-			Value struct {
-				Msg []struct {
-					Type  string `json:"type"`
-					Value struct {
+		Tx         interface{} `json:"tx"`
+		TxResponse struct {
+			Height    string `json:"height"`
+			Txhash    string `json:"txhash"`
+			Codespace string `json:"codespace"`
+			Code      int    `json:"code"`
+			Data      string `json:"data"`
+			RawLog    string `json:"raw_log"`
+			Logs      []struct {
+				MsgIndex int         `json:"msg_index"`
+				Log      string      `json:"log"`
+				Events   interface{} `json:"events"`
+			} `json:"logs"`
+			Info      string `json:"info"`
+			GasWanted string `json:"gas_wanted"`
+			GasUsed   string `json:"gas_used"`
+			Tx        struct {
+				Type string `json:"@type"`
+				Body struct {
+					Messages []struct {
+						Type                string `json:"@type"`
 						DelegatorAddress    string `json:"delegator_address"`
 						ValidatorAddress    string `json:"validator_address"`
 						ValidatorSrcAddress string `json:"validator_src_address"`
@@ -245,16 +253,17 @@ type (
 							Denom  string `json:"denom"`
 							Amount string `json:"amount"`
 						} `json:"amount"`
-					} `json:"value"`
-				} `json:"msg"`
-				Fee struct {
-					Amount []interface{} `json:"amount"`
-					Gas    string        `json:"gas"`
-				} `json:"fee"`
-				Memo string `json:"memo"`
-			} `json:"value"`
-		} `json:"tx"`
-		Timestamp time.Time `json:"timestamp"`
+					} `json:"messages"`
+					Memo                        string        `json:"memo"`
+					TimeoutHeight               string        `json:"timeout_height"`
+					ExtensionOptions            []interface{} `json:"extension_options"`
+					NonCriticalExtensionOptions []interface{} `json:"non_critical_extension_options"`
+				} `json:"body"`
+				AuthInfo   interface{} `json:"auth_info"`
+				Signatures []string    `json:"signatures"`
+			} `json:"tx"`
+			Timestamp time.Time `json:"timestamp"`
+		} `json:"tx_response"`
 	}
 
 	DistributionRewards struct {
