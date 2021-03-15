@@ -41,7 +41,7 @@ func GetValidatorVotingPower(ops HTTPOptions, cfg *config.Config, c client.Clien
 		return ""
 	}
 
-	vp := validatorResp.Result.DelegatorShares
+	vp := validatorResp.Validator.DelegatorShares
 	vp1 := convertValue(vp)
 	votingPower1, _ := strconv.ParseFloat(vp1, 64)
 

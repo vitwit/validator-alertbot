@@ -46,7 +46,7 @@ func ValidatorStatusAlert(ops HTTPOptions, cfg *config.Config, c client.Client) 
 
 	log.Println("a1, a2 and present time : ", a1, a2, t)
 
-	validatorStatus := validatorResp.Result.Jailed
+	validatorStatus := validatorResp.Validator.Jailed
 
 	if !validatorStatus {
 		_ = writeToInfluxDb(c, bp, "vab_val_status", map[string]string{}, map[string]interface{}{"status": "voting"})
@@ -88,7 +88,7 @@ func CheckValidatorJailed(cfg *config.Config) error {
 		return err
 	}
 
-	validatorStatus := validatorResp.Result.Jailed
+	validatorStatus := validatorResp.Validator.Jailed
 	if validatorStatus {
 		_ = SendTelegramAlert(fmt.Sprintf("%s validator is in jailed status", cfg.ValidatorName), cfg)
 		_ = SendEmailAlert(fmt.Sprintf("%s validator is in jailed status", cfg.ValidatorName), cfg)

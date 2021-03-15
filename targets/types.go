@@ -25,46 +25,21 @@ type (
 		Body       []byte
 	}
 
-	// ValidatorDescription struct
-	ValidatorMetaInfo struct {
-		Moniker  string `json:"moniker"`
-		Identity string `json:"identity"`
-		Website  string `json:"website"`
-		Details  string `json:"details"`
-	}
-
-	// ValidatorCommissionRates struct
-	ValidatorCommissionRates struct {
-		Rate          string `json:"rate"`
-		MaxRate       string `json:"max_rate"`
-		MaxChangeRate string `json:"max_change_rate"`
-	}
-
-	// ValidatorCommission struct
-	ValidatorCommission struct {
-		CommissionRates ValidatorCommissionRates `json:"commission_rates"`
-		UpdateTime      string                   `json:"update_time"`
-	}
-
-	// ValidatorResult struct
-	ValidatorDetails struct {
-		OperatorAddress   string              `json:"operator_address"`
-		ConsensusPubKey   string              `json:"consensus_pubkey"`
-		Jailed            bool                `json:"jailed"`
-		Status            int                 `json:"status"`
-		Tokens            string              `json:"tokens"`
-		DelegatorShares   string              `json:"delegator_shares"`
-		Description       ValidatorMetaInfo   `json:"description"`
-		UnbondingHeight   string              `json:"unbonding_height"`
-		UnbondingTime     string              `json:"unbonding_time"`
-		Commission        ValidatorCommission `json:"commission"`
-		MinSelfDelegation string              `json:"min_self_delegation"`
-	}
-
-	// ValidatorResp defines validator result on a particular height
 	ValidatorResp struct {
-		Height string           `json:"height"`
-		Result ValidatorDetails `json:"result"`
+		Validator struct {
+			OperatorAddress string `json:"operator_address"`
+			ConsensusPubkey struct {
+				Type string `json:"@type"`
+				Key  string `json:"key"`
+			} `json:"consensus_pubkey"`
+			Jailed            bool      `json:"jailed"`
+			Status            string    `json:"status"`
+			Tokens            string    `json:"tokens"`
+			DelegatorShares   string    `json:"delegator_shares"`
+			UnbondingHeight   string    `json:"unbonding_height"`
+			UnbondingTime     time.Time `json:"unbonding_time"`
+			MinSelfDelegation string    `json:"min_self_delegation"`
+		} `json:"validator"`
 	}
 
 	// BlockResponse response of a block information
@@ -290,10 +265,32 @@ type (
 				Denom  string `json:"denom"`
 				Amount string `json:"amount"`
 			} `json:"self_bond_rewards"`
-			ValCommission []struct {
-				Denom  string `json:"denom"`
-				Amount string `json:"amount"`
+			ValCommission struct {
+				Commission []struct {
+					Denom  string `json:"denom"`
+					Amount string `json:"amoun t"`
+				} `json:"cmmission"`
 			} `json:"val_commission"`
 		} `json:"result"`
+	}
+
+	// Rewards is a struct which holds outstanding rewards of a validator
+	Rewards struct {
+		Rewards struct {
+			Rewards []struct {
+				Denom  string `json:"denom"`
+				Amount string `json:"amount"`
+			} `json:"rewards"`
+		} `json:"rewards"`
+	}
+
+	// Commission is a struct which holds the commission of a validator
+	Commission struct {
+		Commission struct {
+			Commission []struct {
+				Denom  string `json:"denom"`
+				Amount string `json:"amount"`
+			} `json:"commission"`
+		} `json:"commission"`
 	}
 )

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"strconv"
 	"validator-alertbot/config"
 
@@ -24,30 +25,23 @@ func GetRewradsAndCommission(ops HTTPOptions, cfg *config.Config, c client.Clien
 		return
 	}
 
-	var rewardsResp DistributionRewards
+	var rewardsResp Rewards
 	err = json.Unmarshal(resp.Body, &rewardsResp)
 	if err != nil {
 		log.Printf("Error in DistributionRewards: %v", err)
 		return
 	}
 
-	var commission, rewards string
+	var oustandingRewards float64
 
-	if len(rewardsResp.Result.SelfBondRewards) > 0 {
-		rewards = rewardsResp.Result.SelfBondRewards[0].Amount
-		log.Printf("Val Rewards: %s", rewards)
+	if len(rewardsResp.Rewards.Rewards) > 0 {
+		f, _ := strconv.ParseFloat(rewardsResp.Rewards.Rewards[0].Amount, 64)
+		oustandingRewards = f
 	}
 
-	if len(rewardsResp.Result.ValCommission) > 0 {
-		commission = rewardsResp.Result.ValCommission[0].Amount
-		log.Printf("Val Commission: %s", rewards)
-	}
-
-	if commission != "" && rewards != "" {
-		com, _ := strconv.ParseFloat(commission, 64)
-		r, _ := strconv.ParseFloat(rewards, 64)
-
-		total := com + r
+	commission := GetValCommission(ops, cfg, c)
+	if oustandingRewards != 0 && commission != 0 {
+		total := oustandingRewards - commission
 		s := fmt.Sprintf("%f", total)
 		totalRewrads := ConvertToAKT(s)
 
@@ -74,4 +68,35 @@ func GetRewardsFromDB(cfg *config.Config, c client.Client) string {
 		}
 	}
 	return rewards
+}
+
+// GetValCommission which return the commission of a validator
+func GetValCommission(ops HTTPOptions, cfg *config.Config, c client.Client) float64 {
+	ops = HTTPOptions{
+		Endpoint: cfg.LCDEndpoint + "/cosmos/distribution/v1beta1/validators/" + cfg.ValOperatorAddress + "/commission",
+		Method:   http.MethodGet,
+	}
+
+	var commission float64
+
+	resp, err := HitHTTPTarget(ops)
+	if err != nil {
+		log.Printf("Error: %v", err)
+		return commission
+	}
+
+	var result Commission
+	err = json.Unmarshal(resp.Body, &result)
+	if err != nil {
+		log.Printf("Error while unmarshalling commission: %v", err)
+		return commission
+	}
+
+	if len(result.Commission.Commission) > 0 {
+		f, _ := strconv.ParseFloat(result.Commission.Commission[0].Amount, 64)
+		commission = f
+
+	}
+
+	return commission
 }
