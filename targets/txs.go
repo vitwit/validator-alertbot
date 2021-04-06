@@ -114,12 +114,12 @@ func TxAlerts(ops HTTPOptions, cfg *config.Config, c client.Client) {
 					amountInAKT := ConvertToAKT(amount)
 
 					if txValue.ValidatorSrcAddress == cfg.ValOperatorAddress {
-						_ = SendTelegramAlert(fmt.Sprintf("Redelegation alert: Redelegated %s from validator. %s", amountInAKT, votingPowerMsg), cfg)
+						_ = SendTelegramAlert(fmt.Sprintf("Redelegation alert: Redelegated %s from your validator to %s. %s", amountInAKT, txValue.ValidatorDstAddress, votingPowerMsg), cfg)
 						_ = SendEmailAlert(fmt.Sprintf("Redelegation alert: Redelegated %s from validator. %s ", amountInAKT, votingPowerMsg), cfg)
 					}
 
 					if txValue.ValidatorDstAddress == cfg.ValOperatorAddress {
-						_ = SendTelegramAlert(fmt.Sprintf("Redelegation alert: Redelegated %s to validator. %s", amountInAKT, votingPowerMsg), cfg)
+						_ = SendTelegramAlert(fmt.Sprintf("Redelegation alert: Redelegated %s to your validator from %s. %s", amountInAKT, txValue.ValidatorSrcAddress, votingPowerMsg), cfg)
 						_ = SendEmailAlert(fmt.Sprintf("Redelegation alert: Redelegated %s to validator. %s ", amountInAKT, votingPowerMsg), cfg)
 					}
 				}
