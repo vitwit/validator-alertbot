@@ -49,9 +49,9 @@ func GetRewradsAndCommission(ops HTTPOptions, cfg *config.Config, c client.Clien
 
 		total := com + r
 		s := fmt.Sprintf("%f", total)
-		totalRewrads := ConvertToAKT(s)
+		totalRewrads := ConvertToAKT(s, cfg.Denom)
 
-		_ = writeToInfluxDb(c, bp, "vab_total_rewards", map[string]string{}, map[string]interface{}{"rewards": totalRewrads})
+		_ = writeToInfluxDb(c, bp, "vab_total_rewards", map[string]string{}, map[string]interface{}{"rewards": totalRewrads, "commission": commission, "val_rewards": rewards})
 		log.Printf("Validator total Rewrads: %s", totalRewrads)
 	}
 }
@@ -74,4 +74,44 @@ func GetRewardsFromDB(cfg *config.Config, c client.Client) string {
 		}
 	}
 	return rewards
+}
+
+// GetValRewradsFromDB returns the validator rewards from db
+func GetValRewradsFromDB(cfg *config.Config, c client.Client) string {
+	var rewards string
+	q := client.NewQuery("SELECT last(val_rewards) FROM vab_total_rewards", cfg.InfluxDB.Database, "")
+	if response, err := c.Query(q); err == nil && response.Error() == nil {
+		for _, r := range response.Results {
+			if len(r.Series) != 0 {
+				for idx, col := range r.Series[0].Columns {
+					if col == "last" {
+						status := r.Series[0].Values[0][idx]
+						rewards = fmt.Sprintf("%v", status)
+						break
+					}
+				}
+			}
+		}
+	}
+	return rewards
+}
+
+// GetCommissionFromDB returns the validator commission from db
+func GetCommissionFromDB(cfg *config.Config, c client.Client) string {
+	var commission string
+	q := client.NewQuery("SELECT last(commission) FROM vab_total_rewards", cfg.InfluxDB.Database, "")
+	if response, err := c.Query(q); err == nil && response.Error() == nil {
+		for _, r := range response.Results {
+			if len(r.Series) != 0 {
+				for idx, col := range r.Series[0].Columns {
+					if col == "last" {
+						status := r.Series[0].Values[0][idx]
+						commission = fmt.Sprintf("%v", status)
+						break
+					}
+				}
+			}
+		}
+	}
+	return commission
 }

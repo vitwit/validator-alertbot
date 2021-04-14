@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"validator-alertbot/config"
 
@@ -171,7 +172,7 @@ func GetAccountBal(cfg *config.Config, c client.Client) string {
 	var balanceMsg string
 
 	balance := GetAccountBalFromDb(cfg, c)
-	balanceMsg = fmt.Sprintf("Current balance of your account(%s) is %s \n", cfg.AccountAddress, ConvertToAKT(balance))
+	balanceMsg = fmt.Sprintf("Current balance of your account(%s) is %s \n", cfg.AccountAddress, ConvertToAKT(balance, cfg.Denom))
 
 	return balanceMsg
 }
@@ -180,8 +181,16 @@ func GetAccountBal(cfg *config.Config, c client.Client) string {
 func GetValRewards(cfg *config.Config, c client.Client) string {
 	var rewardsMsg string
 
-	rewards := GetRewardsFromDB(cfg, c)
-	rewardsMsg = fmt.Sprintf("Current rewards of your validator(%s) is %s \n", cfg.ValOperatorAddress, rewards)
+	rewards := GetValRewradsFromDB(cfg, c)
+	rr, _ := strconv.ParseFloat(rewards, 64)
+	r := fmt.Sprintf("%.4f", rr) + cfg.Denom
+	rewardsMsg = fmt.Sprintf("Current rewards and commission of your validator(%s) is :: \nRewards : %s \n", cfg.ValOperatorAddress, r)
+
+	commission := GetCommissionFromDB(cfg, c)
+	cc, _ := strconv.ParseFloat(commission, 64)
+	comm := fmt.Sprintf("%.4f", cc) + cfg.Denom
+
+	rewardsMsg = rewardsMsg + fmt.Sprintf("Commission : %s", comm)
 
 	return rewardsMsg
 }

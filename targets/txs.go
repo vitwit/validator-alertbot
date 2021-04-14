@@ -88,7 +88,7 @@ func TxAlerts(ops HTTPOptions, cfg *config.Config, c client.Client) {
 
 				if txType == "cosmos-sdk/MsgDelegate" {
 					amount := txValue.Amount.Amount
-					amountInAKT := ConvertToAKT(amount)
+					amountInAKT := ConvertToAKT(amount, cfg.Denom)
 					delegatorAddress := txValue.DelegatorAddress
 
 					bal := ConvertToFolat64(amount)
@@ -101,7 +101,7 @@ func TxAlerts(ops HTTPOptions, cfg *config.Config, c client.Client) {
 
 				} else if txType == "cosmos-sdk/MsgUndelegate" {
 					amount := txValue.Amount.Amount
-					amountInAKT := ConvertToAKT(amount)
+					amountInAKT := ConvertToAKT(amount, cfg.Denom)
 
 					if txValue.DelegatorAddress == cfg.AccountAddress || txValue.ValidatorAddress == cfg.ValOperatorAddress {
 
@@ -110,7 +110,7 @@ func TxAlerts(ops HTTPOptions, cfg *config.Config, c client.Client) {
 					}
 				} else if txType == "cosmos-sdk/MsgBeginRedelegate" {
 					amount := txValue.Amount.Amount
-					amountInAKT := ConvertToAKT(amount)
+					amountInAKT := ConvertToAKT(amount, cfg.Denom)
 
 					if txValue.ValidatorSrcAddress == cfg.ValOperatorAddress {
 						_ = SendTelegramAlert(fmt.Sprintf("Redelegation alert: Redelegated %s from validator. %s", amountInAKT, votingPowerMsg), cfg)
