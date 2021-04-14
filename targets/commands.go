@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
 	"validator-alertbot/config"
 
@@ -182,14 +181,11 @@ func GetValRewards(cfg *config.Config, c client.Client) string {
 	var rewardsMsg string
 
 	rewards := GetValRewradsFromDB(cfg, c)
-	rr, _ := strconv.ParseFloat(rewards, 64)
-	r := fmt.Sprintf("%.4f", rr) + cfg.Denom
+	r := ConvertToAKT(rewards, cfg.Denom)
 	rewardsMsg = fmt.Sprintf("Current rewards and commission of your validator(%s) is :: \nRewards : %s \n", cfg.ValOperatorAddress, r)
 
 	commission := GetCommissionFromDB(cfg, c)
-	cc, _ := strconv.ParseFloat(commission, 64)
-	comm := fmt.Sprintf("%.4f", cc) + cfg.Denom
-
+	comm := ConvertToAKT(commission, cfg.Denom)
 	rewardsMsg = rewardsMsg + fmt.Sprintf("Commission : %s", comm)
 
 	return rewardsMsg
