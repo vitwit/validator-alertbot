@@ -32,17 +32,17 @@ func GetRewradsAndCommission(ops HTTPOptions, cfg *config.Config, c client.Clien
 		return
 	}
 
-	var oustandingRewards float64
+	var rewards float64
 
-	if len(rewardsResp.Rewards.Rewards) > 0 {
-		f, _ := strconv.ParseFloat(rewardsResp.Rewards.Rewards[0].Amount, 64)
-		oustandingRewards = f
+	if len(rewardsResp.Rewards) > 0 {
+		f, _ := strconv.ParseFloat(rewardsResp.Rewards[0].Amount, 64)
+		rewards = f
 	}
 
-	commission := GetValCommission(ops, cfg, c)
-	if oustandingRewards != 0 && commission != 0 {
-		total := oustandingRewards - commission
-		s := fmt.Sprintf("%f", total)
+	// commission := GetValCommission(ops, cfg, c)
+	if rewards != 0 {
+		// total := oustandingRewards - commission
+		s := fmt.Sprintf("%f", rewards)
 		totalRewrads := ConvertToAKT(s, cfg.Denom)
 
 		_ = writeToInfluxDb(c, bp, "vab_total_rewards", map[string]string{}, map[string]interface{}{"rewards": totalRewrads})

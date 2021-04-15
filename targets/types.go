@@ -306,11 +306,9 @@ type (
 
 	// Rewards is a struct which holds outstanding rewards of a validator
 	Rewards struct {
-		Rewards struct {
-			Rewards []struct {
-				Denom  string `json:"denom"`
-				Amount string `json:"amount"`
-			} `json:"rewards"`
+		Rewards []struct {
+			Denom  string `json:"denom"`
+			Amount string `json:"amount"`
 		} `json:"rewards"`
 	}
 

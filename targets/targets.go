@@ -101,7 +101,7 @@ func InitTargets(cfg *config.Config) *Targets {
 			ExecutionType: "http",
 			Name:          "Current Rewards Amount",
 			HTTPOptions: HTTPOptions{
-				Endpoint: cfg.LCDEndpoint + "/cosmos/distribution/v1beta1/validators/" + cfg.ValOperatorAddress + "/outstanding_rewards",
+				Endpoint: cfg.LCDEndpoint + "/cosmos/distribution/v1beta1/delegators/" + cfg.AccountAddress + "/rewards/" + cfg.ValOperatorAddress,
 				Method:   http.MethodGet,
 			},
 			Func:        GetRewradsAndCommission,
