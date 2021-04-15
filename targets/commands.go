@@ -179,9 +179,16 @@ func GetAccountBal(cfg *config.Config, c client.Client) string {
 // GetValRewards will returns the message of val rewards
 func GetValRewards(cfg *config.Config, c client.Client) string {
 	var rewardsMsg string
+	var ops HTTPOptions
 
 	rewards := GetRewardsFromDB(cfg, c)
-	rewardsMsg = fmt.Sprintf("Current rewards of your validator(%s) is %s \n", cfg.ValOperatorAddress, rewards)
+	rewardsMsg = fmt.Sprintf("Current rewards and commission of your validator(%s) is :: \nRewards : %s\n", cfg.ValOperatorAddress, rewards)
+
+	commission := GetValCommission(ops, cfg)
+	vc := fmt.Sprintf("%f", commission)
+	valComm := ConvertToAKT(vc, cfg.Denom)
+
+	rewardsMsg = rewardsMsg + fmt.Sprintf("Commission : %s", valComm)
 
 	return rewardsMsg
 }

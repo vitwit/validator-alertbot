@@ -39,9 +39,7 @@ func GetRewradsAndCommission(ops HTTPOptions, cfg *config.Config, c client.Clien
 		rewards = f
 	}
 
-	// commission := GetValCommission(ops, cfg, c)
 	if rewards != 0 {
-		// total := oustandingRewards - commission
 		s := fmt.Sprintf("%f", rewards)
 		totalRewrads := ConvertToAKT(s, cfg.Denom)
 
@@ -71,7 +69,7 @@ func GetRewardsFromDB(cfg *config.Config, c client.Client) string {
 }
 
 // GetValCommission which return the commission of a validator
-func GetValCommission(ops HTTPOptions, cfg *config.Config, c client.Client) float64 {
+func GetValCommission(ops HTTPOptions, cfg *config.Config) float64 {
 	ops = HTTPOptions{
 		Endpoint: cfg.LCDEndpoint + "/cosmos/distribution/v1beta1/validators/" + cfg.ValOperatorAddress + "/commission",
 		Method:   http.MethodGet,
