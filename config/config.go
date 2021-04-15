@@ -69,6 +69,7 @@ type (
 		ValOperatorAddress   string            `mapstructure:"val_operator_addr"`
 		ValidatorHexAddress  string            `mapstructure:"validator_hex_addr"`
 		LCDEndpoint          string            `mapstructure:"lcd_endpoint"`
+		Denom                string            `mapstructure:"denom"`
 		Telegram             TelegramBotConfig `mapstructure:"telegram"`
 		SendGrid             EmailConfig       `mapstructure:"sendgrid"`
 		ExternalRPC          string            `mapstructure:"external_rpc"`

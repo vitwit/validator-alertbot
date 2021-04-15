@@ -48,8 +48,8 @@ func GetAccountInfo(ops HTTPOptions, cfg *config.Config, c client.Client) {
 					balChange = -(balChange)
 				}
 				if balChange > cfg.DelegationAlerts.AccBalanceChangeThreshold {
-					a1 := convertToCommaSeparated(fmt.Sprintf("%f", amount1)) + "AKT"
-					a2 := convertToCommaSeparated(fmt.Sprintf("%f", amount2)) + "AKT"
+					a1 := convertToCommaSeparated(fmt.Sprintf("%f", amount1)) + cfg.Denom
+					a2 := convertToCommaSeparated(fmt.Sprintf("%f", amount2)) + cfg.Denom
 					_ = SendTelegramAlert(fmt.Sprintf("Your account balance has changed from  %s to %s", a1, a2), cfg)
 					_ = SendEmailAlert(fmt.Sprintf("Your account balance has changed from  %s to %s", a1, a2), cfg)
 				}
@@ -62,13 +62,13 @@ func GetAccountInfo(ops HTTPOptions, cfg *config.Config, c client.Client) {
 }
 
 // ConvertToAKT converts balance from uakt to AKT
-func ConvertToAKT(balance string) string {
+func ConvertToAKT(balance string, denom string) string {
 	bal, _ := strconv.ParseFloat(balance, 64)
 
 	a1 := bal / math.Pow(10, 6)
 	amount := fmt.Sprintf("%.6f", a1)
 
-	return convertToCommaSeparated(amount) + "AKT"
+	return convertToCommaSeparated(amount) + denom
 }
 
 // GetAccountBalFromDb returns account balance from db

@@ -171,7 +171,7 @@ func GetAccountBal(cfg *config.Config, c client.Client) string {
 	var balanceMsg string
 
 	balance := GetAccountBalFromDb(cfg, c)
-	balanceMsg = fmt.Sprintf("Current balance of your account(%s) is %s \n", cfg.AccountAddress, ConvertToAKT(balance))
+	balanceMsg = fmt.Sprintf("Current balance of your account(%s) is %s \n", cfg.AccountAddress, ConvertToAKT(balance, cfg.Denom))
 
 	return balanceMsg
 }

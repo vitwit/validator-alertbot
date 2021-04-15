@@ -43,7 +43,7 @@ func GetRewradsAndCommission(ops HTTPOptions, cfg *config.Config, c client.Clien
 	if oustandingRewards != 0 && commission != 0 {
 		total := oustandingRewards - commission
 		s := fmt.Sprintf("%f", total)
-		totalRewrads := ConvertToAKT(s)
+		totalRewrads := ConvertToAKT(s, cfg.Denom)
 
 		_ = writeToInfluxDb(c, bp, "vab_total_rewards", map[string]string{}, map[string]interface{}{"rewards": totalRewrads})
 		log.Printf("Validator total Rewrads: %s", totalRewrads)
