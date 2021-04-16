@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"net/http"
 	"strconv"
 	"strings"
 	"validator-alertbot/config"
@@ -59,6 +60,69 @@ func GetAccountInfo(ops HTTPOptions, cfg *config.Config, c client.Client) {
 		_ = writeToInfluxDb(c, bp, "vab_account_balance", map[string]string{}, map[string]interface{}{"balance": amount, "denom": denom})
 		log.Printf("Address Balance: %s \t and denom : %s", amount, denom)
 	}
+}
+
+func GetUndelegatedRes(ops HTTPOptions) (Undelegation, error) {
+	var undelegated Undelegation
+	resp, err := HitHTTPTarget(ops)
+	if err != nil {
+		log.Printf("Error in get account info: %v", err)
+		return undelegated, err
+	}
+
+	err = json.Unmarshal(resp.Body, &undelegated)
+	if err != nil {
+		log.Printf("Error while unmarshelling AccountResp: %v", err)
+		return undelegated, err
+	}
+
+	return undelegated, nil
+}
+
+func GetUndelegated(ops HTTPOptions, cfg *config.Config, c client.Client) {
+	ops = HTTPOptions{
+		Endpoint: cfg.LCDEndpoint + "/cosmos/staking/v1beta1/validators/" + cfg.ValOperatorAddress + "/unbonding_delegations",
+		Method:   http.MethodGet,
+	}
+
+	undelegated, err := GetUndelegatedRes(ops)
+	if err != nil {
+		log.Printf("Error while getting undelegation res : %v", err)
+		return
+	}
+	var totalUndelegated int64
+
+	totalCount, _ := strconv.ParseFloat(undelegated.Pagination.Total, 64)
+	l := math.Ceil(totalCount / 50)
+	// nextKey := undelegated.Pagination.NextKey
+	perPage := "50"
+
+	for i := 1; i <= int(l); i++ {
+		// log.Printf("iiiiiiii........", i)
+		pages := 50 * i
+		offset := strconv.Itoa(pages)
+		ops = HTTPOptions{
+			Endpoint: cfg.LCDEndpoint + "/cosmos/staking/v1beta1/validators/" + cfg.ValOperatorAddress + "/unbonding_delegations?pagination.limit=" + perPage + "&pagination.offset=" + offset,
+			Method:   http.MethodGet,
+		}
+
+		resp, err := GetUndelegatedRes(ops)
+		if err != nil {
+			log.Printf("Error while getting undelegation resp : %v", err)
+			return
+		}
+		// log.Printf("len.......", len(resp.UnbondingResponses), ops.Endpoint)
+		for _, v := range resp.UnbondingResponses {
+			if len(v.Entries) > 0 {
+				value := v.Entries[0].InitialBalance
+				bal, _ := strconv.ParseInt(value, 10, 64)
+				totalUndelegated = totalUndelegated + bal
+				// log.Printf("some..", value)
+			}
+		}
+	}
+
+	log.Println(undelegated.Pagination.Total, totalCount, totalUndelegated)
 }
 
 // ConvertToAKT converts balance from uakt to AKT
