@@ -24,6 +24,9 @@ external_rpc = "http://46.101.176.149:26657"
 # Name of your validator to be displayed in alerts
 validator_name = "Akash"
 
+# Denom to represent value in alerts
+denom  = "AKASH"
+
 # These are for regular status updates. 
 # To receive validator status daily (twice), configure these parameters in the form of "02:25PM". The time here refers to UTC time.
 alert_time1 = "02:30PM"
