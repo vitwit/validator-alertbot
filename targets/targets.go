@@ -109,16 +109,6 @@ func InitTargets(cfg *config.Config) *Targets {
 		},
 		{
 			ExecutionType: "http",
-			Name:          "Calculate unbonding delegations",
-			HTTPOptions: HTTPOptions{
-				Endpoint: cfg.LCDEndpoint + "/cosmos/staking/v1beta1/validators/" + cfg.ValOperatorAddress + "/unbonding_delegations",
-				Method:   http.MethodGet,
-			},
-			Func:        GetUndelegated,
-			ScraperRate: cfg.Scraper.Rate,
-		},
-		{
-			ExecutionType: "http",
 			Name:          "Alert about endpoints status",
 			Func:          GetEndpointsStatus,
 			ScraperRate:   "600s",

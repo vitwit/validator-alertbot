@@ -79,18 +79,19 @@ func GetUndelegatedRes(ops HTTPOptions) (Undelegation, error) {
 	return undelegated, nil
 }
 
-func GetUndelegated(ops HTTPOptions, cfg *config.Config, c client.Client) {
+func GetUndelegated(cfg *config.Config) (int64, error) {
+	var ops HTTPOptions
 	ops = HTTPOptions{
 		Endpoint: cfg.LCDEndpoint + "/cosmos/staking/v1beta1/validators/" + cfg.ValOperatorAddress + "/unbonding_delegations",
 		Method:   http.MethodGet,
 	}
+	var totalUndelegated int64
 
 	undelegated, err := GetUndelegatedRes(ops)
 	if err != nil {
 		log.Printf("Error while getting undelegation res : %v", err)
-		return
+		return totalUndelegated, err
 	}
-	var totalUndelegated int64
 
 	totalCount, _ := strconv.ParseFloat(undelegated.Pagination.Total, 64)
 	l := math.Ceil(totalCount / 50)
@@ -98,7 +99,6 @@ func GetUndelegated(ops HTTPOptions, cfg *config.Config, c client.Client) {
 	perPage := "50"
 
 	for i := 1; i <= int(l); i++ {
-		// log.Printf("iiiiiiii........", i)
 		pages := 50 * i
 		offset := strconv.Itoa(pages)
 		ops = HTTPOptions{
@@ -109,20 +109,21 @@ func GetUndelegated(ops HTTPOptions, cfg *config.Config, c client.Client) {
 		resp, err := GetUndelegatedRes(ops)
 		if err != nil {
 			log.Printf("Error while getting undelegation resp : %v", err)
-			return
+			return totalUndelegated, err
 		}
-		// log.Printf("len.......", len(resp.UnbondingResponses), ops.Endpoint)
+
 		for _, v := range resp.UnbondingResponses {
 			if len(v.Entries) > 0 {
 				value := v.Entries[0].InitialBalance
 				bal, _ := strconv.ParseInt(value, 10, 64)
 				totalUndelegated = totalUndelegated + bal
-				// log.Printf("some..", value)
 			}
 		}
 	}
 
-	log.Println(undelegated.Pagination.Total, totalCount, totalUndelegated)
+	log.Printf("Undelated count : %d, Toatl pages : %f", totalUndelegated, totalCount)
+
+	return totalUndelegated, nil
 }
 
 // ConvertToAKT converts balance from uakt to AKT
