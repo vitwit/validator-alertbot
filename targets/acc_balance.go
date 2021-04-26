@@ -84,6 +84,7 @@ func GetUndelegated(cfg *config.Config) (int64, error) {
 	ops = HTTPOptions{
 		Endpoint: cfg.LCDEndpoint + "/cosmos/staking/v1beta1/validators/" + cfg.ValOperatorAddress + "/unbonding_delegations",
 		Method:   http.MethodGet,
+		// QueryParams: QueryParams{"pagination.limit=": "100"},
 	}
 	var totalUndelegated int64
 
@@ -94,16 +95,16 @@ func GetUndelegated(cfg *config.Config) (int64, error) {
 	}
 
 	totalCount, _ := strconv.ParseFloat(undelegated.Pagination.Total, 64)
-	l := math.Ceil(totalCount / 50)
-	// nextKey := undelegated.Pagination.NextKey
-	perPage := "50"
+	l := math.Ceil(totalCount / 100)
+	nextKey := undelegated.Pagination.NextKey
+	dataLength := 0
 
 	for i := 1; i <= int(l); i++ {
-		pages := 50 * i
-		offset := strconv.Itoa(pages)
 		ops = HTTPOptions{
-			Endpoint: cfg.LCDEndpoint + "/cosmos/staking/v1beta1/validators/" + cfg.ValOperatorAddress + "/unbonding_delegations?pagination.limit=" + perPage + "&pagination.offset=" + offset,
-			Method:   http.MethodGet,
+			// Endpoint: cfg.LCDEndpoint + "/cosmos/staking/v1beta1/validators/" + cfg.ValOperatorAddress + "/unbonding_delegations?pagination.limit=" + "50" + "&pagination.offset=" + offset,
+			Endpoint:    cfg.LCDEndpoint + "/cosmos/staking/v1beta1/validators/" + cfg.ValOperatorAddress + "/unbonding_delegations",
+			Method:      http.MethodGet,
+			QueryParams: QueryParams{"pagination.limit=": "50", "pagination.key": nextKey},
 		}
 
 		resp, err := GetUndelegatedRes(ops)
@@ -119,9 +120,13 @@ func GetUndelegated(cfg *config.Config) (int64, error) {
 				totalUndelegated = totalUndelegated + bal
 			}
 		}
+		nextKey = resp.Pagination.NextKey
+
+		dataLength = dataLength + len(resp.UnbondingResponses)
+		log.Println("i and next key..", i, nextKey)
 	}
 
-	log.Printf("Undelated count : %d, Toatl pages : %f", totalUndelegated, totalCount)
+	log.Printf("Undelated count : %d, Toatl count from url : %f, Calculated data length : %d", totalUndelegated, totalCount, dataLength)
 
 	return totalUndelegated, nil
 }
