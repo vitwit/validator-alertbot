@@ -13,7 +13,6 @@ import (
 
 // SendSingleMissedBlockAlert to send missed block alerting
 func SendSingleMissedBlockAlert(cfg *config.Config, c client.Client, addrExists bool, cbh string) error {
-	log.Println("Calling missed block alerting")
 	bp, err := createBatchPoints(cfg.InfluxDB.Database)
 	if err != nil {
 		return err
