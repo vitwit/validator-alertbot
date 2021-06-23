@@ -35,9 +35,18 @@ func GetAccountInfo(ops HTTPOptions, cfg *config.Config, c client.Client) {
 		return
 	}
 
+	var amount, denom string
+
+	for _, value := range accResp.Balances {
+		if value.Denom == cfg.BalanceDenom {
+			amount = value.Amount
+			denom = value.Denom
+		}
+	}
+
 	if len(accResp.Balances) > 0 {
-		amount := accResp.Balances[0].Amount
-		denom := accResp.Balances[0].Denom
+		// amount := accResp.Balances[0].Amount
+		// denom := accResp.Balances[0].Denom
 		prevAmount := GetAccountBalFromDb(cfg, c)
 
 		if prevAmount != amount {

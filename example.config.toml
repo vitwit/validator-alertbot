@@ -32,6 +32,9 @@ alert_time2 = "02:30AM"
 # Configure this field to yes if you want to get alerts about balance change
 balance_change_alert = "yes"
 
+# Mention balance denom of network
+balance_denom = "uosmo"
+
 # An integer value to receive block difference alerts
 #If you want to receive this alert make enable_alert to yes otherwise no
 [block_diff_alert]

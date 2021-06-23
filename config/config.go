@@ -83,6 +83,7 @@ type (
 		PeersAlert           PeersAlert        `mapstructure:"Peers_alert"`
 		AccountAddress       string            `mapstructure:"account_addr"`
 		BalanceChangeAlerts  string            `mapstructure:"balance_change_alert"`
+		BalanceDenom         string            `mapstructure:"balance_denom"`
 		MissedBlocksAlert    MissedBlocksAlert `mapstructure:"missed_blocks_alert"`
 		DelegationAlerts     DelegationAlerts  `mapstructure:"delegation_alerts"`
 	}
