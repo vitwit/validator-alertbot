@@ -142,7 +142,7 @@ func GetPeersCountMsg(cfg *config.Config, c client.Client) string {
 func NodeStatus(cfg *config.Config, c client.Client) string {
 	var status string
 
-	nodeSync := GetNodeSync(cfg, c)
+	nodeSync, _ := GetNodeSync(cfg, c)
 	status = fmt.Sprintf("Your validator node is %s \n", nodeSync)
 
 	return status

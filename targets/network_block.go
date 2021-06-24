@@ -33,7 +33,7 @@ func GetNetworkLatestBlock(ops HTTPOptions, cfg *config.Config, c client.Client)
 	}
 
 	// Calling function to get validator latest block height
-	validatorHeight := GetValStatus(ops, cfg, c)
+	validatorHeight, synced := GetValStatus(cfg, c)
 
 	if &networkBlock != nil {
 
@@ -57,11 +57,13 @@ func GetNetworkLatestBlock(ops HTTPOptions, cfg *config.Config, c client.Client)
 
 		blockDiffThreshold := cfg.BlockDiffAlert.BlockDiffThreshold
 		// Send alert
-		if strings.ToUpper(cfg.BlockDiffAlert.EnableAlert) == "YES" && int64(heightDiff) >= blockDiffThreshold {
-			_ = SendTelegramAlert(fmt.Sprintf("Block difference between network and validator has exceeded %d", blockDiffThreshold), cfg)
-			_ = SendEmailAlert(fmt.Sprintf("Block difference between network and validator has exceeded %d", blockDiffThreshold), cfg)
+		if synced == 1 {
+			if strings.ToUpper(cfg.BlockDiffAlert.EnableAlert) == "YES" && int64(heightDiff) >= blockDiffThreshold {
+				_ = SendTelegramAlert(fmt.Sprintf("Block difference between network and validator has exceeded %d", blockDiffThreshold), cfg)
+				_ = SendEmailAlert(fmt.Sprintf("Block difference between network and validator has exceeded %d", blockDiffThreshold), cfg)
 
-			log.Println("Sent alert of block height difference")
+				log.Println("Sent alert of block height difference")
+			}
 		}
 	} else {
 		_ = SendTelegramAlert("External RPC is not working!", cfg)

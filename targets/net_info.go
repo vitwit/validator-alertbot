@@ -31,13 +31,17 @@ func GetNetInfo(ops HTTPOptions, cfg *config.Config, c client.Client) {
 		return
 	}
 
+	_, synced := GetNodeSync(cfg, c) // get syncing status
+
 	numPeers, err := strconv.Atoi(ni.Result.NumPeers)
 	if err != nil {
 		log.Printf("Error converting num_peers to int: %v", err)
 		numPeers = 0
 	} else if strings.ToUpper(cfg.PeersAlert.EnableAlert) == "YES" && int64(numPeers) < cfg.PeersAlert.NumPeersThreshold {
-		_ = SendTelegramAlert(fmt.Sprintf("Number of peers connected to .your validator has fallen below %d", cfg.PeersAlert.NumPeersThreshold), cfg)
-		_ = SendEmailAlert(fmt.Sprintf("Number of peers connected to your validator has fallen below %d", cfg.PeersAlert.NumPeersThreshold), cfg)
+		if synced == "1" {
+			_ = SendTelegramAlert(fmt.Sprintf("Number of peers connected to .your validator has fallen below %d", cfg.PeersAlert.NumPeersThreshold), cfg)
+			_ = SendEmailAlert(fmt.Sprintf("Number of peers connected to your validator has fallen below %d", cfg.PeersAlert.NumPeersThreshold), cfg)
+		}
 	}
 	p1, err := createDataPoint("vab_num_peers", map[string]string{}, map[string]interface{}{"count": numPeers})
 	if err == nil {

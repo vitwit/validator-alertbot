@@ -13,10 +13,10 @@ import (
 
 // GetValStatus to reponse of validator status like
 // current block height and node status
-func GetValStatus(ops HTTPOptions, cfg *config.Config, c client.Client) string {
+func GetValStatus(cfg *config.Config, c client.Client) (string, int) {
 	bp, err := createBatchPoints(cfg.InfluxDB.Database)
 	if err != nil {
-		return ""
+		return "", -1
 	}
 	var pts []*client.Point
 
@@ -27,14 +27,14 @@ func GetValStatus(ops HTTPOptions, cfg *config.Config, c client.Client) string {
 
 	if err != nil {
 		log.Printf("Error in get val status: %v", err)
-		return ""
+		return "", -1
 	}
-
+	var synced int
 	var status ValidatorRPCStatus
 	err = json.Unmarshal(resp.Body, &status)
 	if err != nil {
 		log.Printf("Error while unmarshelling ValidatorRPCStatus : %v", err)
-		return ""
+		return "", -1
 	}
 
 	currentBlockHeight := status.Result.SyncInfo.LatestBlockHeight
@@ -49,7 +49,6 @@ func GetValStatus(ops HTTPOptions, cfg *config.Config, c client.Client) string {
 			}
 		}
 
-		var synced int
 		caughtUp := !status.Result.SyncInfo.CatchingUp
 		if !caughtUp {
 			_ = SendTelegramAlert("Your validator node is not synced!", cfg)
@@ -72,7 +71,7 @@ func GetValStatus(ops HTTPOptions, cfg *config.Config, c client.Client) string {
 		_ = SendEmailAlert("Validator RPC is not working!", cfg)
 	}
 
-	return currentBlockHeight
+	return currentBlockHeight, synced
 }
 
 // GetValidatorBlockHeight returns validator current block height from db
@@ -96,7 +95,7 @@ func GetValidatorBlockHeight(cfg *config.Config, c client.Client) string {
 }
 
 // GetNodeSync returns the syncing status of a node
-func GetNodeSync(cfg *config.Config, c client.Client) string {
+func GetNodeSync(cfg *config.Config, c client.Client) (string, string) {
 	var status, sync string
 	q := client.NewQuery("SELECT last(status) FROM vab_node_synced", cfg.InfluxDB.Database, "")
 	if response, err := c.Query(q); err == nil && response.Error() == nil {
@@ -119,5 +118,5 @@ func GetNodeSync(cfg *config.Config, c client.Client) string {
 		status = "not synced"
 	}
 
-	return status
+	return status, sync
 }

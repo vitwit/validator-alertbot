@@ -41,6 +41,7 @@ func GetAccountInfo(ops HTTPOptions, cfg *config.Config, c client.Client) {
 		if value.Denom == cfg.BalanceDenom {
 			amount = value.Amount
 			denom = value.Denom
+			break
 		}
 	}
 

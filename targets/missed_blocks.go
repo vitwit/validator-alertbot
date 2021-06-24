@@ -19,11 +19,16 @@ func SendSingleMissedBlockAlert(cfg *config.Config, c client.Client, addrExists 
 	}
 
 	if !addrExists {
+		_, synced := GetNodeSync(cfg, c) // get syncing status
+
 		if cfg.MissedBlocksAlert.MissedBlocksThreshold == 1 {
-			if strings.ToUpper(cfg.MissedBlocksAlert.EnableAlert) == "YES" {
-				_ = SendTelegramAlert(fmt.Sprintf("%s validator missed a block at block height %s", cfg.ValidatorName, cbh), cfg)
-				_ = SendEmailAlert(fmt.Sprintf("%s validator missed a block at block height %s", cfg.ValidatorName, cbh), cfg)
-				log.Println("Sent missed block alerting")
+			// Calling function to get validator latest block height
+			if synced == "1" {
+				if strings.ToUpper(cfg.MissedBlocksAlert.EnableAlert) == "YES" {
+					_ = SendTelegramAlert(fmt.Sprintf("%s validator missed a block at block height %s", cfg.ValidatorName, cbh), cfg)
+					_ = SendEmailAlert(fmt.Sprintf("%s validator missed a block at block height %s", cfg.ValidatorName, cbh), cfg)
+					log.Println("Sent missed block alerting")
+				}
 			}
 			_ = writeToInfluxDb(c, bp, "vab_missed_blocks", map[string]string{}, map[string]interface{}{"block_height": cbh, "current_height": cbh})
 		}
@@ -102,15 +107,20 @@ func MissedBlocks(ops HTTPOptions, cfg *config.Config, c client.Client) {
 
 			}
 			if strings.ToUpper(cfg.MissedBlocksAlert.EnableAlert) == "YES" && cfg.MissedBlocksAlert.MissedBlocksThreshold > 1 {
+				_, synced := GetNodeSync(cfg, c) // get syncing status
+
 				if int64(len(blocksArray))-1 >= cfg.MissedBlocksAlert.MissedBlocksThreshold {
 					missedBlocks := strings.Split(blocks, ",")
-					err = SendTelegramAlert(fmt.Sprintf("%s validator missed blocks from height %s to %s", cfg.ValidatorName, missedBlocks[0], missedBlocks[len(missedBlocks)-2]), cfg)
-					err = SendEmailAlert(fmt.Sprintf("%s validator missed blocks from height %s to %s", cfg.ValidatorName, missedBlocks[0], missedBlocks[len(missedBlocks)-2]), cfg)
+					if synced == "1" {
+						err = SendTelegramAlert(fmt.Sprintf("%s validator missed blocks from height %s to %s", cfg.ValidatorName, missedBlocks[0], missedBlocks[len(missedBlocks)-2]), cfg)
+						err = SendEmailAlert(fmt.Sprintf("%s validator missed blocks from height %s to %s", cfg.ValidatorName, missedBlocks[0], missedBlocks[len(missedBlocks)-2]), cfg)
+					}
 					err = writeToInfluxDb(c, bp, "vab_missed_blocks", map[string]string{}, map[string]interface{}{"block_height": "", "current_height": cbh})
 					if err != nil {
 						return
 					}
 					return
+
 				}
 				if len(blocksArray) == 1 {
 					blocks = cbh + ","

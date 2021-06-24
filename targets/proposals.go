@@ -187,19 +187,22 @@ func GetProposals(ops HTTPOptions, cfg *config.Config, c client.Client) {
 				}
 			}
 
+			_, synced := GetNodeSync(cfg, c) // get syncing status
 			if newProposal {
 				log.Printf("New Proposal Came: %s", proposal.ProposalID)
 				_ = writeToInfluxDb(c, bp, "vab_proposals", tag, fields)
 
-				if proposal.Status == "PROPOSAL_STATUS_REJECTED" || proposal.Status == "PROPOSAL_STATUS_PASSED" {
-					_ = SendTelegramAlert(fmt.Sprintf("Proposal "+proposal.Content.Type+" with proposal id = %s has been %s", proposal.ProposalID, proposal.Status), cfg)
-					_ = SendEmailAlert(fmt.Sprintf("Proposal "+proposal.Content.Type+" with proposal id = %s has been = %s", proposal.ProposalID, proposal.Status), cfg)
-				} else if proposal.Status == "PROPOSAL_STATUS_VOTING_PERIOD" {
-					_ = SendTelegramAlert(fmt.Sprintf("Proposal "+proposal.Content.Type+" with proposal id = %s has been moved to %s", proposal.ProposalID, proposal.Status), cfg)
-					_ = SendEmailAlert(fmt.Sprintf("Proposal "+proposal.Content.Type+" with proposal id = %s has been moved to %s", proposal.ProposalID, proposal.Status), cfg)
-				} else {
-					_ = SendTelegramAlert(fmt.Sprintf("A new proposal "+proposal.Content.Type+" has been added to "+proposal.Status+" with proposal id = %s", proposal.ProposalID), cfg)
-					_ = SendEmailAlert(fmt.Sprintf("A new proposal "+proposal.Content.Type+" has been added to "+proposal.Status+" with proposal id = %s", proposal.ProposalID), cfg)
+				if synced == "1" {
+					if proposal.Status == "PROPOSAL_STATUS_REJECTED" || proposal.Status == "PROPOSAL_STATUS_PASSED" {
+						_ = SendTelegramAlert(fmt.Sprintf("Proposal "+proposal.Content.Type+" with proposal id = %s has been %s", proposal.ProposalID, proposal.Status), cfg)
+						_ = SendEmailAlert(fmt.Sprintf("Proposal "+proposal.Content.Type+" with proposal id = %s has been = %s", proposal.ProposalID, proposal.Status), cfg)
+					} else if proposal.Status == "PROPOSAL_STATUS_VOTING_PERIOD" {
+						_ = SendTelegramAlert(fmt.Sprintf("Proposal "+proposal.Content.Type+" with proposal id = %s has been moved to %s", proposal.ProposalID, proposal.Status), cfg)
+						_ = SendEmailAlert(fmt.Sprintf("Proposal "+proposal.Content.Type+" with proposal id = %s has been moved to %s", proposal.ProposalID, proposal.Status), cfg)
+					} else {
+						_ = SendTelegramAlert(fmt.Sprintf("A new proposal "+proposal.Content.Type+" has been added to "+proposal.Status+" with proposal id = %s", proposal.ProposalID), cfg)
+						_ = SendEmailAlert(fmt.Sprintf("A new proposal "+proposal.Content.Type+" has been added to "+proposal.Status+" with proposal id = %s", proposal.ProposalID), cfg)
+					}
 				}
 			} else {
 				q := client.NewQuery(fmt.Sprintf("DELETE FROM vab_proposals WHERE id = '%s'", proposal.ProposalID), cfg.InfluxDB.Database, "")
@@ -211,13 +214,16 @@ func GetProposals(ops HTTPOptions, cfg *config.Config, c client.Client) {
 				}
 				log.Printf("Writing the proposal: %s", proposal.ProposalID)
 				_ = writeToInfluxDb(c, bp, "vab_proposals", tag, fields)
-				if proposal.Status != proposalStatus {
-					if proposal.Status == "PROPOSAL_STATUS_REJECTED" || proposal.Status == "PROPOSAL_STATUS_PASSED" {
-						_ = SendTelegramAlert(fmt.Sprintf("Proposal "+proposal.Content.Type+" with proposal id = %s has been %s", proposal.ProposalID, proposal.Status), cfg)
-						_ = SendEmailAlert(fmt.Sprintf("Proposal "+proposal.Content.Type+" with proposal id = %s has been = %s", proposal.ProposalID, proposal.Status), cfg)
-					} else {
-						_ = SendTelegramAlert(fmt.Sprintf("Proposal "+proposal.Content.Type+" with proposal id = %s has been moved to %s", proposal.ProposalID, proposal.Status), cfg)
-						_ = SendEmailAlert(fmt.Sprintf("Proposal "+proposal.Content.Type+" with proposal id = %s has been moved to %s", proposal.ProposalID, proposal.Status), cfg)
+
+				if synced == "1" {
+					if proposal.Status != proposalStatus {
+						if proposal.Status == "PROPOSAL_STATUS_REJECTED" || proposal.Status == "PROPOSAL_STATUS_PASSED" {
+							_ = SendTelegramAlert(fmt.Sprintf("Proposal "+proposal.Content.Type+" with proposal id = %s has been %s", proposal.ProposalID, proposal.Status), cfg)
+							_ = SendEmailAlert(fmt.Sprintf("Proposal "+proposal.Content.Type+" with proposal id = %s has been = %s", proposal.ProposalID, proposal.Status), cfg)
+						} else {
+							_ = SendTelegramAlert(fmt.Sprintf("Proposal "+proposal.Content.Type+" with proposal id = %s has been moved to %s", proposal.ProposalID, proposal.Status), cfg)
+							_ = SendEmailAlert(fmt.Sprintf("Proposal "+proposal.Content.Type+" with proposal id = %s has been moved to %s", proposal.ProposalID, proposal.Status), cfg)
+						}
 					}
 				}
 			}
