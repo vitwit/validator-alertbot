@@ -182,8 +182,11 @@ func GetAccountBal(cfg *config.Config, c client.Client) string {
 	unbonding := strconv.FormatInt(undelegated, 10)
 	balanceMsg = balanceMsg + fmt.Sprintf("Unboding Delegations : %s \n", ConvertToAKT(unbonding, cfg.Denom))
 
-	vp := GetVotingPowerFromDb(cfg, c) + cfg.Denom
-	balanceMsg = balanceMsg + fmt.Sprintf("Delegations : %s", vp)
+	selfdelegated, err := GetSelfDelegation(cfg)
+	if err != nil {
+		log.Printf("Error while getting self delegations : %v", err)
+	}
+	balanceMsg = balanceMsg + fmt.Sprintf("Self delegations : %s", selfdelegated)
 	return balanceMsg
 }
 

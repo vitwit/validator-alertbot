@@ -72,6 +72,50 @@ func GetAccountInfo(ops HTTPOptions, cfg *config.Config, c client.Client) {
 	}
 }
 
+func GetSelfDelegation(cfg *config.Config) (string, error) {
+	var ops HTTPOptions
+	ops = HTTPOptions{
+		Endpoint: cfg.LCDEndpoint + "/cosmos/staking/v1beta1/delegations/" + cfg.AccountAddress,
+		Method:   http.MethodGet,
+	}
+	var selfDelegated string
+
+	resp, err := GetSelfDelegationResp(ops)
+	if err != nil {
+		log.Printf("Error while getting self delegations response : %v", err)
+		return selfDelegated, err
+	}
+
+	for _, v := range resp.DelegationResponses {
+		if v.Delegation.ValidatorAddress == cfg.ValOperatorAddress {
+			s := v.Balance.Amount
+			a := ConvertToFolat64(s)
+			selfDelegated = convertToCommaSeparated(fmt.Sprintf("%f", a)) + cfg.Denom
+		}
+	}
+
+	log.Printf("selfdelegated amout : %s", selfDelegated)
+
+	return selfDelegated, nil
+}
+
+func GetSelfDelegationResp(ops HTTPOptions) (SelfDelegations, error) {
+	var delegation SelfDelegations
+	resp, err := HitHTTPTarget(ops)
+	if err != nil {
+		log.Printf("Error in get account info: %v", err)
+		return delegation, err
+	}
+
+	err = json.Unmarshal(resp.Body, &delegation)
+	if err != nil {
+		log.Printf("Error while unmarshelling self delegation response: %v", err)
+		return delegation, err
+	}
+
+	return delegation, nil
+}
+
 func GetUndelegatedRes(ops HTTPOptions) (Undelegation, error) {
 	var undelegated Undelegation
 	resp, err := HitHTTPTarget(ops)
