@@ -173,11 +173,11 @@ func GetAccountBal(cfg *config.Config, c client.Client) string {
 	balance := GetAccountBalFromDb(cfg, c)
 	balanceMsg = fmt.Sprintf("Current balance of your account(%s) is %s \n", cfg.AccountAddress, ConvertToAKT(balance, cfg.Denom))
 
-	undelegated, err := GetUndelegated(cfg)
-	if err != nil {
-		log.Printf("Error while getting undelegated balance : %v", err)
-	}
-	balanceMsg = balanceMsg + fmt.Sprintf("Unboding delegations : %s \n", undelegated)
+	// undelegated, err := GetUndelegated(cfg)
+	// if err != nil {
+	// 	log.Printf("Error while getting undelegated balance : %v", err)
+	// }
+	// balanceMsg = balanceMsg + fmt.Sprintf("Unboding delegations : %s \n", undelegated)
 
 	selfdelegated, err := GetSelfDelegation(cfg)
 	if err != nil {
