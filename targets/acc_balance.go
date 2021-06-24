@@ -133,56 +133,31 @@ func GetUndelegatedRes(ops HTTPOptions) (Undelegation, error) {
 	return undelegated, nil
 }
 
-func GetUndelegated(cfg *config.Config) (int64, error) {
+func GetUndelegated(cfg *config.Config) (string, error) {
 	var ops HTTPOptions
 	ops = HTTPOptions{
-		Endpoint: cfg.LCDEndpoint + "/cosmos/staking/v1beta1/validators/" + cfg.ValOperatorAddress + "/unbonding_delegations",
+		Endpoint: cfg.LCDEndpoint + "/cosmos/staking/v1beta1/delegators/" + cfg.AccountAddress + "/unbonding_delegations",
 		Method:   http.MethodGet,
-		// QueryParams: QueryParams{"pagination.limit=": "100"},
 	}
-	var totalUndelegated int64
+	var unDelegated string
 
-	undelegated, err := GetUndelegatedRes(ops)
+	resp, err := GetUndelegatedRes(ops)
 	if err != nil {
-		log.Printf("Error while getting undelegation res : %v", err)
-		return totalUndelegated, err
+		log.Printf("Error while getting self delegations response : %v", err)
+		return unDelegated, err
 	}
 
-	totalCount, _ := strconv.ParseFloat(undelegated.Pagination.Total, 64)
-	l := math.Ceil(totalCount / 100)
-	nextKey := undelegated.Pagination.NextKey
-	dataLength := 0
-
-	for i := 1; i <= int(l); i++ {
-		ops = HTTPOptions{
-			// Endpoint: cfg.LCDEndpoint + "/cosmos/staking/v1beta1/validators/" + cfg.ValOperatorAddress + "/unbonding_delegations?pagination.limit=" + "50" + "&pagination.offset=" + offset,
-			Endpoint:    cfg.LCDEndpoint + "/cosmos/staking/v1beta1/validators/" + cfg.ValOperatorAddress + "/unbonding_delegations",
-			Method:      http.MethodGet,
-			QueryParams: QueryParams{"pagination.limit=": "50", "pagination.key": nextKey},
+	for _, v := range resp.UnbondingResponses {
+		if v.Undelegation.ValidatorAddress == cfg.ValOperatorAddress {
+			s := v.Balance.Amount
+			a := ConvertToFolat64(s)
+			unDelegated = convertToCommaSeparated(fmt.Sprintf("%f", a)) + cfg.Denom
 		}
-
-		resp, err := GetUndelegatedRes(ops)
-		if err != nil {
-			log.Printf("Error while getting undelegation resp : %v", err)
-			return totalUndelegated, err
-		}
-
-		for _, v := range resp.UnbondingResponses {
-			if len(v.Entries) > 0 {
-				value := v.Entries[0].InitialBalance
-				bal, _ := strconv.ParseInt(value, 10, 64)
-				totalUndelegated = totalUndelegated + bal
-			}
-		}
-		nextKey = resp.Pagination.NextKey
-
-		dataLength = dataLength + len(resp.UnbondingResponses)
-		log.Println("i and next key..", i, nextKey)
 	}
 
-	log.Printf("Undelated count : %d, Toatl count from url : %f, Calculated data length : %d", totalUndelegated, totalCount, dataLength)
+	log.Printf("Unbonding delegations : %s", unDelegated)
 
-	return totalUndelegated, nil
+	return unDelegated, nil
 }
 
 // ConvertToAKT converts balance from uakt to AKT

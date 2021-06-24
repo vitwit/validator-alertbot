@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
 	"validator-alertbot/config"
 
@@ -178,9 +177,7 @@ func GetAccountBal(cfg *config.Config, c client.Client) string {
 	if err != nil {
 		log.Printf("Error while getting undelegated balance : %v", err)
 	}
-
-	unbonding := strconv.FormatInt(undelegated, 10)
-	balanceMsg = balanceMsg + fmt.Sprintf("Unboding Delegations : %s \n", ConvertToAKT(unbonding, cfg.Denom))
+	balanceMsg = balanceMsg + fmt.Sprintf("Unboding delegations : %s \n", undelegated)
 
 	selfdelegated, err := GetSelfDelegation(cfg)
 	if err != nil {
