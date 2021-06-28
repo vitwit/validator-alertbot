@@ -39,7 +39,7 @@ func GetNetInfo(ops HTTPOptions, cfg *config.Config, c client.Client) {
 		numPeers = 0
 	} else if strings.ToUpper(cfg.PeersAlert.EnableAlert) == "YES" && int64(numPeers) < cfg.PeersAlert.NumPeersThreshold {
 		if synced == "1" {
-			_ = SendTelegramAlert(fmt.Sprintf("Number of peers connected to .your validator has fallen below %d", cfg.PeersAlert.NumPeersThreshold), cfg)
+			_ = SendTelegramAlert(fmt.Sprintf("Number of peers connected to your validator has fallen below %d", cfg.PeersAlert.NumPeersThreshold), cfg)
 			_ = SendEmailAlert(fmt.Sprintf("Number of peers connected to your validator has fallen below %d", cfg.PeersAlert.NumPeersThreshold), cfg)
 		}
 	}
