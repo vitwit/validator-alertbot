@@ -35,6 +35,10 @@ balance_change_alert = "yes"
 # Mention balance denom of network
 balance_denom = "uosmo"
 
+[enable_alerts]
+enable_telegram_alerts = "yes"
+enable_email_alerts = "yes"
+
 # An integer value to receive block difference alerts
 #If you want to receive this alert make enable_alert to yes otherwise no
 [block_diff_alert]

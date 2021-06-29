@@ -63,6 +63,11 @@ type (
 		AccBalanceChangeThreshold float64 `mapstructure:"acc_balance_change_threshold"`
 	}
 
+	EnableAlerts struct {
+		EnableTelegramAlerts string `mapstructure:"enable_telegram_alerts"`
+		EnableEmailAlerts    string `mapstructure:"enable_email_alerts"`
+	}
+
 	// Config defines all the app configurations
 	Config struct {
 		ValidatorRPCEndpoint string            `mapstructure:"validator_rpc_endpoint"`
@@ -70,6 +75,7 @@ type (
 		ValidatorHexAddress  string            `mapstructure:"validator_hex_addr"`
 		LCDEndpoint          string            `mapstructure:"lcd_endpoint"`
 		Denom                string            `mapstructure:"denom"`
+		EnableAlerts         EnableAlerts      `mapstructure:"enable_alerts"`
 		Telegram             TelegramBotConfig `mapstructure:"telegram"`
 		SendGrid             EmailConfig       `mapstructure:"sendgrid"`
 		ExternalRPC          string            `mapstructure:"external_rpc"`
