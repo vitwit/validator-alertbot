@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 	"validator-alertbot/config"
+	"validator-alertbot/utils"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	client "github.com/influxdata/influxdb1-client/v2"
@@ -171,7 +172,7 @@ func GetAccountBal(cfg *config.Config, c client.Client) string {
 	var balanceMsg string
 
 	balance := GetAccountBalFromDb(cfg, c)
-	balanceMsg = fmt.Sprintf("Current balance of your account(%s) is %s \n", cfg.AccountAddress, ConvertToAKT(balance, cfg.Denom))
+	balanceMsg = fmt.Sprintf("Current balance of your account(%s) is %s \n", cfg.AccountAddress, utils.ConvertToAKT(balance, cfg.Denom))
 
 	// undelegated, err := GetUndelegated(cfg)
 	// if err != nil {
@@ -197,7 +198,7 @@ func GetValRewards(cfg *config.Config, c client.Client) string {
 
 	commission := GetValCommission(ops, cfg)
 	vc := fmt.Sprintf("%f", commission)
-	valComm := ConvertToAKT(vc, cfg.Denom)
+	valComm := utils.ConvertToAKT(vc, cfg.Denom)
 
 	rewardsMsg = rewardsMsg + fmt.Sprintf("Commission : %s", valComm)
 

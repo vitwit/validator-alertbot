@@ -4,15 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"math"
 	"net/http"
-	"strconv"
 	"strings"
 	"validator-alertbot/config"
+	"validator-alertbot/utils"
 
 	client "github.com/influxdata/influxdb1-client/v2"
-	"golang.org/x/text/language"
-	"golang.org/x/text/message"
 )
 
 // GetAccountInfo to get account balance information using account address
@@ -52,15 +49,15 @@ func GetAccountInfo(ops HTTPOptions, cfg *config.Config, c client.Client) {
 
 		if prevAmount != amount {
 			if strings.ToUpper(cfg.BalanceChangeAlerts) == "YES" {
-				amount1 := ConvertToFolat64(prevAmount)
-				amount2 := ConvertToFolat64(amount)
+				amount1 := utils.ConvertToFolat64(prevAmount)
+				amount2 := utils.ConvertToFolat64(amount)
 				balChange := amount1 - amount2
 				if balChange < 0 {
 					balChange = -(balChange)
 				}
 				if balChange > cfg.DelegationAlerts.AccBalanceChangeThreshold {
-					a1 := convertToCommaSeparated(fmt.Sprintf("%f", amount1)) + cfg.Denom
-					a2 := convertToCommaSeparated(fmt.Sprintf("%f", amount2)) + cfg.Denom
+					a1 := utils.ConvertToCommaSeparated(fmt.Sprintf("%f", amount1)) + cfg.Denom
+					a2 := utils.ConvertToCommaSeparated(fmt.Sprintf("%f", amount2)) + cfg.Denom
 					_ = SendTelegramAlert(fmt.Sprintf("Your account balance has changed from  %s to %s", a1, a2), cfg)
 					_ = SendEmailAlert(fmt.Sprintf("Your account balance has changed from  %s to %s", a1, a2), cfg)
 				}
@@ -89,8 +86,8 @@ func GetSelfDelegation(cfg *config.Config) (string, error) {
 	for _, v := range resp.DelegationResponses {
 		if v.Delegation.ValidatorAddress == cfg.ValOperatorAddress {
 			s := v.Balance.Amount
-			a := ConvertToFolat64(s)
-			selfDelegated = convertToCommaSeparated(fmt.Sprintf("%f", a)) + cfg.Denom
+			a := utils.ConvertToFolat64(s)
+			selfDelegated = utils.ConvertToCommaSeparated(fmt.Sprintf("%f", a)) + cfg.Denom
 		}
 	}
 
@@ -150,24 +147,14 @@ func GetUndelegated(cfg *config.Config) (string, error) {
 	for _, v := range resp.UnbondingResponses {
 		if v.Undelegation.ValidatorAddress == cfg.ValOperatorAddress {
 			s := v.Balance.Amount
-			a := ConvertToFolat64(s)
-			unDelegated = convertToCommaSeparated(fmt.Sprintf("%f", a)) + cfg.Denom
+			a := utils.ConvertToFolat64(s)
+			unDelegated = utils.ConvertToCommaSeparated(fmt.Sprintf("%f", a)) + cfg.Denom
 		}
 	}
 
 	log.Printf("Unbonding delegations : %s", unDelegated)
 
 	return unDelegated, nil
-}
-
-// ConvertToAKT converts balance from uakt to AKT
-func ConvertToAKT(balance string, denom string) string {
-	bal, _ := strconv.ParseFloat(balance, 64)
-
-	a1 := bal / math.Pow(10, 6)
-	amount := fmt.Sprintf("%.6f", a1)
-
-	return convertToCommaSeparated(amount) + denom
 }
 
 // GetAccountBalFromDb returns account balance from db
@@ -188,28 +175,4 @@ func GetAccountBalFromDb(cfg *config.Config, c client.Client) string {
 		}
 	}
 	return balance
-}
-
-func convertToCommaSeparated(amt string) string {
-	a, err := strconv.Atoi(amt)
-	if err != nil {
-		return amt
-	}
-	p := message.NewPrinter(language.English)
-	return p.Sprintf("%d", a)
-}
-
-// ConvertToFolat64 converts balance from string to float64
-func ConvertToFolat64(balance string) float64 {
-	bal, _ := strconv.ParseFloat(balance, 64)
-
-	a1 := bal / math.Pow(10, 6)
-	amount := fmt.Sprintf("%.6f", a1)
-
-	a, err := strconv.ParseFloat(amount, 64)
-	if err != nil {
-		log.Printf("Error while converting string to folat64 : %v", err)
-	}
-
-	return a
 }

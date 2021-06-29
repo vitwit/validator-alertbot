@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"validator-alertbot/config"
+	"validator-alertbot/utils"
 
 	client "github.com/influxdata/influxdb1-client/v2"
 )
@@ -41,7 +42,7 @@ func GetRewradsAndCommission(ops HTTPOptions, cfg *config.Config, c client.Clien
 
 	if rewards != 0 {
 		s := fmt.Sprintf("%f", rewards)
-		totalRewrads := ConvertToAKT(s, cfg.Denom)
+		totalRewrads := utils.ConvertToAKT(s, cfg.Denom)
 
 		_ = writeToInfluxDb(c, bp, "vab_total_rewards", map[string]string{}, map[string]interface{}{"rewards": totalRewrads})
 		log.Printf("Validator total Rewrads: %s", totalRewrads)

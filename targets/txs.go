@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"validator-alertbot/config"
+	"validator-alertbot/utils"
 
 	client "github.com/influxdata/influxdb1-client/v2"
 )
@@ -90,10 +91,10 @@ func TxAlerts(ops HTTPOptions, cfg *config.Config, c client.Client) {
 				if txType == "/cosmos.staking.v1beta1.MsgDelegate" {
 
 					amount := txValue.Amount.Amount
-					amountInAKT := ConvertToAKT(amount, cfg.Denom)
+					amountInAKT := utils.ConvertToAKT(amount, cfg.Denom)
 					delegatorAddress := txValue.DelegatorAddress
 
-					bal := ConvertToFolat64(amount)
+					bal := utils.ConvertToFolat64(amount)
 					if bal > cfg.DelegationAlerts.DelegationAmountThreshold {
 						if txValue.ValidatorAddress == cfg.ValOperatorAddress {
 							_ = SendTelegramAlert(fmt.Sprintf("Delegation alert: you have a new delegation %s from %s and %s ", amountInAKT, delegatorAddress, votingPowerMsg), cfg)
@@ -102,7 +103,7 @@ func TxAlerts(ops HTTPOptions, cfg *config.Config, c client.Client) {
 					}
 				} else if txType == "/cosmos.staking.v1beta1.MsgUndelegate" {
 					amount := txValue.Amount.Amount
-					amountInAKT := ConvertToAKT(amount, cfg.Denom)
+					amountInAKT := utils.ConvertToAKT(amount, cfg.Denom)
 
 					if txValue.DelegatorAddress == cfg.AccountAddress || txValue.ValidatorAddress == cfg.ValOperatorAddress {
 
@@ -111,7 +112,7 @@ func TxAlerts(ops HTTPOptions, cfg *config.Config, c client.Client) {
 					}
 				} else if txType == "/cosmos.staking.v1beta1.MsgBeginRedelegate" {
 					amount := txValue.Amount.Amount
-					amountInAKT := ConvertToAKT(amount, cfg.Denom)
+					amountInAKT := utils.ConvertToAKT(amount, cfg.Denom)
 
 					if txValue.ValidatorSrcAddress == cfg.ValOperatorAddress {
 						_ = SendTelegramAlert(fmt.Sprintf("Redelegation alert: Redelegated %s from your validator to %s. %s", amountInAKT, txValue.ValidatorDstAddress, votingPowerMsg), cfg)
