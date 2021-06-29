@@ -68,6 +68,10 @@ type (
 		EnableEmailAlerts    string `mapstructure:"enable_email_alerts"`
 	}
 
+	NodeSyncAlerts struct {
+		EnableAlerts string `mapstructure:"enable_alerts"`
+	}
+
 	// Config defines all the app configurations
 	Config struct {
 		ValidatorRPCEndpoint string            `mapstructure:"validator_rpc_endpoint"`
@@ -78,6 +82,7 @@ type (
 		EnableAlerts         EnableAlerts      `mapstructure:"enable_alerts"`
 		Telegram             TelegramBotConfig `mapstructure:"telegram"`
 		SendGrid             EmailConfig       `mapstructure:"sendgrid"`
+		NodeSyncAlerts       NodeSyncAlerts    `mapstructure:"node_sync_alerts"`
 		ExternalRPC          string            `mapstructure:"external_rpc"`
 		AlertTime1           string            `mapstructure:"alert_time1"`
 		AlertTime2           string            `mapstructure:"alert_time2"`

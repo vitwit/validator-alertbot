@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"validator-alertbot/config"
 
 	client "github.com/influxdata/influxdb1-client/v2"
@@ -51,8 +52,10 @@ func GetValStatus(cfg *config.Config, c client.Client) (string, int) {
 
 		caughtUp := !status.Result.SyncInfo.CatchingUp
 		if !caughtUp {
-			_ = SendTelegramAlert("Your validator node is not synced!", cfg)
-			_ = SendEmailAlert("Your validator node is not synced!", cfg)
+			if strings.EqualFold(cfg.NodeSyncAlerts.EnableAlerts, "yes") == true {
+				_ = SendTelegramAlert("Your validator node is not synced!", cfg)
+				_ = SendEmailAlert("Your validator node is not synced!", cfg)
+			}
 			synced = 0
 		} else {
 			synced = 1

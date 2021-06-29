@@ -35,9 +35,14 @@ balance_change_alert = "yes"
 # Mention balance denom of network
 balance_denom = "uosmo"
 
+# This is to enable telegram and email alerts
 [enable_alerts]
 enable_telegram_alerts = "yes"
 enable_email_alerts = "yes"
+
+# If you want to receive alerts about node syncing status, then make it yes otherwise no
+[node_sync_alerts]
+enable_alerts = "yes"
 
 # An integer value to receive block difference alerts
 #If you want to receive this alert make enable_alert to yes otherwise no
