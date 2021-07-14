@@ -65,7 +65,7 @@ func InitTargets(cfg *config.Config) *Targets {
 				Method:   http.MethodGet,
 			},
 			Func:        GetNetInfo,
-			ScraperRate: "10s",
+			ScraperRate: "30s",
 		},
 		{
 			ExecutionType: "http",
