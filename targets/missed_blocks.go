@@ -68,16 +68,16 @@ func MissedBlocks(ops HTTPOptions, cfg *config.Config, c client.Client) {
 	cbh := networkLatestBlock.Result.SyncInfo.LatestBlockHeight
 
 	resp, err = HitHTTPTarget(HTTPOptions{
-		Endpoint:    cfg.ExternalRPC + "/block",
-		QueryParams: QueryParams{"height": cbh},
-		Method:      "GET",
+		Endpoint: cfg.LCDEndpoint + "/blocks/" + cbh,
+		// QueryParams: QueryParams{"height": cbh},
+		Method: "GET",
 	})
 	if err != nil {
 		log.Printf("Error getting details of current block: %v", err)
 		return
 	}
 
-	var b BlockResponse
+	var b LCDBlockResponse
 	err = json.Unmarshal(resp.Body, &b)
 	if err != nil {
 		log.Printf("Error: %v", err)
@@ -86,7 +86,7 @@ func MissedBlocks(ops HTTPOptions, cfg *config.Config, c client.Client) {
 
 	if &b != nil {
 		addrExists := false
-		for _, c := range b.Result.Block.LastCommit.Signatures {
+		for _, c := range b.Block.LastCommit.Signatures {
 			if strings.EqualFold(c.ValidatorAddress, cfg.ValidatorHexAddress) {
 				addrExists = true
 			}

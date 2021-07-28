@@ -67,6 +67,29 @@ type (
 		} `json:"result"`
 	}
 
+	// LCDBlockResponse wich holds the block response, got from lcd
+	LCDBlockResponse struct {
+		Block struct {
+			Header interface{} `json:"header"`
+			Data   struct {
+				Txs []interface{} `json:"txs"`
+			} `json:"data"`
+			Evidence struct {
+				Evidence []interface{} `json:"evidence"`
+			} `json:"evidence"`
+			LastCommit struct {
+				Height string `json:"height"`
+				// Round  int    `json:"round"`
+				Signatures []struct {
+					BlockIDFlag      int       `json:"block_id_flag"`
+					ValidatorAddress string    `json:"validator_address"`
+					Timestamp        time.Time `json:"timestamp"`
+					Signature        string    `json:"signature"`
+				} `json:"signatures"`
+			} `json:"last_commit"`
+		} `json:"block"`
+	}
+
 	// NetworkLatestBlock stores latest block height info
 	NetworkLatestBlock struct {
 		Result struct {
