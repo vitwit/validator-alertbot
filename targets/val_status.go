@@ -51,8 +51,17 @@ func ValidatorStatusAlert(ops HTTPOptions, cfg *config.Config, c client.Client) 
 	if !validatorStatus {
 		_ = writeToInfluxDb(c, bp, "vab_val_status", map[string]string{}, map[string]interface{}{"status": "voting"})
 		if t == a1 || t == a2 {
-			_ = SendTelegramAlert(fmt.Sprintf("Your validator %s is currently voting", cfg.ValidatorName), cfg)
-			_ = SendEmailAlert(fmt.Sprintf("Your validator is currently voting"), cfg)
+			msg := "-> Your validator %s is currently voting\n\n"
+			valHeight := GetValidatorBlockHeight(cfg, c)
+			msg = msg + fmt.Sprintf("-> Validator current block height %s \n", valHeight)
+
+			networkHeight := GetNetworkBlock(cfg, c)
+			msg = msg + fmt.Sprintf("-> Network current block height %s \n\n", networkHeight)
+
+			msg = msg + GetEndPointsStatus(cfg)
+
+			_ = SendTelegramAlert(fmt.Sprintf(msg, cfg.ValidatorName), cfg)
+			_ = SendEmailAlert(fmt.Sprintf(msg), cfg)
 			log.Println("Sent validator status alert")
 		}
 	} else {
