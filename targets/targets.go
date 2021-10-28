@@ -35,7 +35,7 @@ func InitTargets(cfg *config.Config) *Targets {
 				Method:   http.MethodGet,
 			},
 			Func:        MissedBlocks,
-			ScraperRate: cfg.Scraper.Rate,
+			ScraperRate: "3s",
 		},
 		{
 			ExecutionType: "http",
