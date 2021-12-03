@@ -3,7 +3,6 @@ package targets
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
@@ -15,18 +14,19 @@ import (
 // GetValidatorVoted to check validator voted for the proposal or not
 func GetValidatorVoted(LCDEndpoint string, proposalID string, accountAddress string) string {
 	proposalURL := LCDEndpoint + "/cosmos/gov/v1beta1/proposals" + proposalID + "/votes"
-	res, err := http.Get(proposalURL)
+	ops := HTTPOptions{
+		Endpoint: proposalURL,
+		Method:   http.MethodGet,
+	}
+	res, err := HitHTTPTarget(ops)
 	if err != nil {
 		log.Printf("Error in get proposal votes: %v", err)
 	}
 
 	var voters ProposalVoters
-	if res != nil {
-		body, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			log.Printf("Error while reading resp of proposal voters : %v ", err)
-		}
-		_ = json.Unmarshal(body, &voters)
+	err = json.Unmarshal(res.Body, &voters)
+	if err != nil {
+		log.Printf("Error while reading resp of proposal voters : %v ", err)
 	}
 
 	validatorVoted := "not voted"
@@ -41,40 +41,37 @@ func GetValidatorVoted(LCDEndpoint string, proposalID string, accountAddress str
 // SendVotingPeriodProposalAlerts which send alerts of voting period proposals
 func SendVotingPeriodProposalAlerts(LCDEndpoint string, accountAddress string, cfg *config.Config) error {
 	proposalURL := LCDEndpoint + "/cosmos/gov/v1beta1/proposals?status=PROPOSAL_STATUS_VOTING_PERIOD"
-	res, err := http.Get(proposalURL)
+	ops := HTTPOptions{
+		Endpoint: proposalURL,
+		Method:   http.MethodGet,
+	}
+	res, err := HitHTTPTarget(ops)
 	if err != nil {
-		log.Printf("Error in get voting_period proposals: %v", err)
-		return err
+		log.Printf("Error in get proposal votes: %v", err)
 	}
 
 	var p Proposals
-	if res != nil {
-		body, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			log.Printf("Error while reading resp of proposals : %v ", err)
-			return err
-		}
-		_ = json.Unmarshal(body, &p)
+	err = json.Unmarshal(res.Body, &p)
+	if err != nil {
+		log.Printf("Error while reading resp of proposal voters : %v ", err)
 	}
 
 	for _, proposal := range p.Proposals {
 		proposalVotesURL := LCDEndpoint + "/cosmos/gov/v1beta1/proposals/" + proposal.ProposalID + "/votes"
-		res, err := http.Get(proposalVotesURL)
+		ops := HTTPOptions{
+			Endpoint: proposalVotesURL,
+			Method:   http.MethodGet,
+		}
+		res, err := HitHTTPTarget(ops)
 		if err != nil {
 			log.Printf("Error in get proposal votes: %v", err)
-			return err
 		}
 
 		var voters ProposalVoters
-		if res != nil {
-			body, err := ioutil.ReadAll(res.Body)
-			if err != nil {
-				log.Printf("Error while reading resp of proposal voters : %v", err)
-				return err
-			}
-			_ = json.Unmarshal(body, &voters)
+		err = json.Unmarshal(res.Body, &voters)
+		if err != nil {
+			log.Printf("Error while reading resp of proposal voters : %v ", err)
 		}
-
 		var validatorVoted string
 		for _, value := range voters.Result {
 			if value.Voter == accountAddress {
@@ -102,18 +99,19 @@ func SendVotingPeriodProposalAlerts(LCDEndpoint string, accountAddress string, c
 // GetValidatorDeposited to check validator deposited for the proposal or not
 func GetValidatorDeposited(LCDEndpoint string, proposalID string, accountAddress string) string {
 	proposalURL := LCDEndpoint + "/cosmos/gov/v1beta1/proposals/" + proposalID + "/deposits"
-	res, err := http.Get(proposalURL)
+	ops := HTTPOptions{
+		Endpoint: proposalURL,
+		Method:   http.MethodGet,
+	}
+	res, err := HitHTTPTarget(ops)
 	if err != nil {
-		log.Printf("Error in get deposit proposals: %v", err)
+		log.Printf("Error in get proposal votes: %v", err)
 	}
 
 	var depositors Depositors
-	if res != nil {
-		body, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			log.Printf("Error while reading resp of depositors : %v ", err)
-		}
-		_ = json.Unmarshal(body, &depositors)
+	err = json.Unmarshal(res.Body, &depositors)
+	if err != nil {
+		log.Printf("Error while reading resp of proposal voters : %v ", err)
 	}
 
 	validateDeposit := "no"
