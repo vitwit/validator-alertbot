@@ -99,7 +99,7 @@ func MissedBlocks(ops HTTPOptions, cfg *config.Config, c client.Client) {
 			blocks := GetContinuousMissedBlock(cfg, c)
 			currentHeightFromDb := GetlatestCurrentHeightFromDB(cfg, c)
 			blocksArray := strings.Split(blocks, ",")
-			fmt.Println("blocks length ", int64(len(blocksArray)), currentHeightFromDb)
+			fmt.Println("blocks length", int64(len(blocksArray)), currentHeightFromDb)
 			// calling function to store single blocks
 			err = SendSingleMissedBlockAlert(cfg, c, addrExists, cbh)
 			if err != nil {

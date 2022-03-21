@@ -231,7 +231,10 @@ type (
 			VotingStartTime string `json:"voting_start_time"`
 			VotingEndTime   string `json:"voting_end_time"`
 		} `json:"proposals"`
-		Pagination interface{} `json:"pagination"`
+		Pagination struct {
+			NextKey string `json:"next_key"`
+			Total   string `json:"total"`
+		} `json:"pagination"`
 	}
 
 	// ProposalVoters struct holds the parameters of proposal voters

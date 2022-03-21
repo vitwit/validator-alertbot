@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math"
 	"net/http"
+	"strconv"
 	"time"
 	"validator-alertbot/config"
 
@@ -145,91 +147,112 @@ func GetProposals(ops HTTPOptions, cfg *config.Config, c client.Client) {
 		return
 	}
 
-	for _, proposal := range p.Proposals {
-		validatorVoted := GetValidatorVoted(cfg.LCDEndpoint, proposal.ProposalID, cfg.AccountAddress)
-		validatorDeposited := GetValidatorDeposited(cfg.LCDEndpoint, proposal.ProposalID, cfg.AccountAddress)
-		err = SendVotingPeriodProposalAlerts(cfg.LCDEndpoint, cfg.AccountAddress, cfg)
+	totalCount, _ := strconv.ParseFloat(p.Pagination.Total, 64)
+	l := math.Ceil(totalCount / 100)
+	nextKey := p.Pagination.NextKey
+	for i := 1; i <= int(l); i++ {
+		ops := HTTPOptions{
+			Endpoint:    cfg.LCDEndpoint + "/cosmos/gov/v1beta1/proposals",
+			Method:      http.MethodGet,
+			QueryParams: QueryParams{"pagination.limit=": "100", "pagination.key": nextKey},
+		}
+		resp, err := HitHTTPTarget(ops)
 		if err != nil {
-			log.Printf("Error while sending voting period alert: %v", err)
+			log.Printf("Error: %v", err)
+			return
 		}
 
-		tag := map[string]string{"id": proposal.ProposalID}
-		fields := map[string]interface{}{
-			"proposal_id":               proposal.ProposalID,
-			"content_type":              proposal.Content.Type,
-			"content_value_title":       proposal.Content.Title,
-			"content_value_description": proposal.Content.Description,
-			"proposal_status":           proposal.Status,
-			"final_tally_result":        proposal.FinalTallyResult,
-			"submit_time":               GetUserDateFormat(proposal.SubmitTime),
-			"deposit_end_time":          GetUserDateFormat(proposal.DepositEndTime),
-			"total_deposit":             proposal.TotalDeposit,
-			"voting_start_time":         GetUserDateFormat(proposal.VotingStartTime),
-			"voting_end_time":           GetUserDateFormat(proposal.VotingEndTime),
-			"validator_voted":           validatorVoted,
-			"validator_deposited":       validatorDeposited,
+		var p Proposals
+		err = json.Unmarshal(resp.Body, &p)
+		if err != nil {
+			log.Printf("Error: %v", err)
+			return
 		}
-		newProposal := false
-		proposalStatus := ""
-		q := client.NewQuery(fmt.Sprintf("SELECT * FROM vab_proposals WHERE proposal_id = '%s'", proposal.ProposalID), cfg.InfluxDB.Database, "")
-		if response, err := c.Query(q); err == nil && response.Error() == nil {
-			for _, r := range response.Results {
-				if len(r.Series) == 0 {
-					newProposal = true
-					break
-				} else {
-					for idx, col := range r.Series[0].Columns {
-						if col == "proposal_status" {
-							v := r.Series[0].Values[0][idx]
-							proposalStatus = fmt.Sprintf("%v", v)
+		for _, proposal := range p.Proposals {
+			validatorVoted := GetValidatorVoted(cfg.LCDEndpoint, proposal.ProposalID, cfg.AccountAddress)
+			validatorDeposited := GetValidatorDeposited(cfg.LCDEndpoint, proposal.ProposalID, cfg.AccountAddress)
+			err = SendVotingPeriodProposalAlerts(cfg.LCDEndpoint, cfg.AccountAddress, cfg)
+			if err != nil {
+				log.Printf("Error while sending voting period alert: %v", err)
+			}
+
+			tag := map[string]string{"id": proposal.ProposalID}
+			fields := map[string]interface{}{
+				"proposal_id":               proposal.ProposalID,
+				"content_type":              proposal.Content.Type,
+				"content_value_title":       proposal.Content.Title,
+				"content_value_description": proposal.Content.Description,
+				"proposal_status":           proposal.Status,
+				"final_tally_result":        proposal.FinalTallyResult,
+				"submit_time":               GetUserDateFormat(proposal.SubmitTime),
+				"deposit_end_time":          GetUserDateFormat(proposal.DepositEndTime),
+				"total_deposit":             proposal.TotalDeposit,
+				"voting_start_time":         GetUserDateFormat(proposal.VotingStartTime),
+				"voting_end_time":           GetUserDateFormat(proposal.VotingEndTime),
+				"validator_voted":           validatorVoted,
+				"validator_deposited":       validatorDeposited,
+			}
+			newProposal := false
+			proposalStatus := ""
+			q := client.NewQuery(fmt.Sprintf("SELECT * FROM vab_proposals WHERE proposal_id = '%s'", proposal.ProposalID), cfg.InfluxDB.Database, "")
+			if response, err := c.Query(q); err == nil && response.Error() == nil {
+				for _, r := range response.Results {
+					if len(r.Series) == 0 {
+						newProposal = true
+						break
+					} else {
+						for idx, col := range r.Series[0].Columns {
+							if col == "proposal_status" {
+								v := r.Series[0].Values[0][idx]
+								proposalStatus = fmt.Sprintf("%v", v)
+							}
 						}
 					}
 				}
-			}
 
-			_, synced := GetNodeSync(cfg, c) // get syncing status
-			if newProposal {
-				log.Printf("New Proposal Came: %s", proposal.ProposalID)
-				_ = writeToInfluxDb(c, bp, "vab_proposals", tag, fields)
+				_, synced := GetNodeSync(cfg, c) // get syncing status
+				if newProposal {
+					log.Printf("New Proposal Came: %s", proposal.ProposalID)
+					_ = writeToInfluxDb(c, bp, "vab_proposals", tag, fields)
 
-				if synced == "1" {
-					if proposal.Status == "PROPOSAL_STATUS_REJECTED" || proposal.Status == "PROPOSAL_STATUS_PASSED" {
-						_ = SendTelegramAlert(fmt.Sprintf("Proposal "+proposal.Content.Type+" with proposal id = %s has been %s", proposal.ProposalID, proposal.Status), cfg)
-						_ = SendEmailAlert(fmt.Sprintf("Proposal "+proposal.Content.Type+" with proposal id = %s has been = %s", proposal.ProposalID, proposal.Status), cfg)
-					} else if proposal.Status == "PROPOSAL_STATUS_VOTING_PERIOD" {
-						_ = SendTelegramAlert(fmt.Sprintf("Proposal "+proposal.Content.Type+" with proposal id = %s has been moved to %s", proposal.ProposalID, proposal.Status), cfg)
-						_ = SendEmailAlert(fmt.Sprintf("Proposal "+proposal.Content.Type+" with proposal id = %s has been moved to %s", proposal.ProposalID, proposal.Status), cfg)
-					} else {
-						_ = SendTelegramAlert(fmt.Sprintf("A new proposal "+proposal.Content.Type+" has been added to "+proposal.Status+" with proposal id = %s", proposal.ProposalID), cfg)
-						_ = SendEmailAlert(fmt.Sprintf("A new proposal "+proposal.Content.Type+" has been added to "+proposal.Status+" with proposal id = %s", proposal.ProposalID), cfg)
-					}
-				}
-			} else {
-				q := client.NewQuery(fmt.Sprintf("DELETE FROM vab_proposals WHERE id = '%s'", proposal.ProposalID), cfg.InfluxDB.Database, "")
-				if response, err := c.Query(q); err == nil && response.Error() == nil {
-					log.Printf("Delete proposal %s from vab_proposals", proposal.ProposalID)
-				} else {
-					log.Printf("Failed to delete proposal %s from vab_proposals", proposal.ProposalID)
-					log.Printf("Reason for proposal deletion failure %v", response)
-				}
-				log.Printf("Writing the proposal: %s", proposal.ProposalID)
-				_ = writeToInfluxDb(c, bp, "vab_proposals", tag, fields)
-
-				if synced == "1" {
-					if proposal.Status != proposalStatus {
+					if synced == "1" {
 						if proposal.Status == "PROPOSAL_STATUS_REJECTED" || proposal.Status == "PROPOSAL_STATUS_PASSED" {
 							_ = SendTelegramAlert(fmt.Sprintf("Proposal "+proposal.Content.Type+" with proposal id = %s has been %s", proposal.ProposalID, proposal.Status), cfg)
 							_ = SendEmailAlert(fmt.Sprintf("Proposal "+proposal.Content.Type+" with proposal id = %s has been = %s", proposal.ProposalID, proposal.Status), cfg)
-						} else {
+						} else if proposal.Status == "PROPOSAL_STATUS_VOTING_PERIOD" {
 							_ = SendTelegramAlert(fmt.Sprintf("Proposal "+proposal.Content.Type+" with proposal id = %s has been moved to %s", proposal.ProposalID, proposal.Status), cfg)
 							_ = SendEmailAlert(fmt.Sprintf("Proposal "+proposal.Content.Type+" with proposal id = %s has been moved to %s", proposal.ProposalID, proposal.Status), cfg)
+						} else {
+							_ = SendTelegramAlert(fmt.Sprintf("A new proposal "+proposal.Content.Type+" has been added to "+proposal.Status+" with proposal id = %s", proposal.ProposalID), cfg)
+							_ = SendEmailAlert(fmt.Sprintf("A new proposal "+proposal.Content.Type+" has been added to "+proposal.Status+" with proposal id = %s", proposal.ProposalID), cfg)
+						}
+					}
+				} else {
+					q := client.NewQuery(fmt.Sprintf("DELETE FROM vab_proposals WHERE id = '%s'", proposal.ProposalID), cfg.InfluxDB.Database, "")
+					if response, err := c.Query(q); err == nil && response.Error() == nil {
+						log.Printf("Delete proposal %s from vab_proposals", proposal.ProposalID)
+					} else {
+						log.Printf("Failed to delete proposal %s from vab_proposals", proposal.ProposalID)
+						log.Printf("Reason for proposal deletion failure %v", response)
+					}
+					log.Printf("Writing the proposal: %s", proposal.ProposalID)
+					_ = writeToInfluxDb(c, bp, "vab_proposals", tag, fields)
+
+					if synced == "1" {
+						if proposal.Status != proposalStatus {
+							if proposal.Status == "PROPOSAL_STATUS_REJECTED" || proposal.Status == "PROPOSAL_STATUS_PASSED" {
+								_ = SendTelegramAlert(fmt.Sprintf("Proposal "+proposal.Content.Type+" with proposal id = %s has been %s", proposal.ProposalID, proposal.Status), cfg)
+								_ = SendEmailAlert(fmt.Sprintf("Proposal "+proposal.Content.Type+" with proposal id = %s has been = %s", proposal.ProposalID, proposal.Status), cfg)
+							} else {
+								_ = SendTelegramAlert(fmt.Sprintf("Proposal "+proposal.Content.Type+" with proposal id = %s has been moved to %s", proposal.ProposalID, proposal.Status), cfg)
+								_ = SendEmailAlert(fmt.Sprintf("Proposal "+proposal.Content.Type+" with proposal id = %s has been moved to %s", proposal.ProposalID, proposal.Status), cfg)
+							}
 						}
 					}
 				}
 			}
 		}
 	}
-
 	// Calling fucntion to delete deposit proposals
 	// which are ended
 	err = DeleteDepoitEndProposals(cfg, c, p)
