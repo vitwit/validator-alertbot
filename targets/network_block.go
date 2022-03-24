@@ -51,9 +51,7 @@ func GetNetworkLatestBlock(ops HTTPOptions, cfg *config.Config, c client.Client)
 
 		vaidatorBlockHeight, _ := strconv.Atoi(validatorHeight)
 		heightDiff := networkBlockHeight - vaidatorBlockHeight
-		fmt.Println("Difff", heightDiff)
 		oppHeightDiff := vaidatorBlockHeight - networkBlockHeight
-		fmt.Println("oppHeiDiff", oppHeightDiff)
 		_ = writeToInfluxDb(c, bp, "vab_height_difference", map[string]string{}, map[string]interface{}{"difference": heightDiff})
 		log.Printf("Network height: %d and Validator Height: %d", networkBlockHeight, vaidatorBlockHeight)
 
