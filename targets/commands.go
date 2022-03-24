@@ -49,6 +49,8 @@ func TelegramAlerting(ops HTTPOptions, cfg *config.Config, c client.Client) {
 			msgToSend = GetValRewards(cfg, c)
 		} else if update.Message.Text == "/rpc_status" {
 			msgToSend = GetEndPointsStatus(cfg)
+		} else if update.Message.Text == "/endpoints" {
+			msgToSend = GetEndpointsList(cfg)
 		} else if update.Message.Text == "/list" {
 			msgToSend = GetHelp()
 		} else {
@@ -123,7 +125,7 @@ func GetEndPointsStatus(cfg *config.Config) string {
 func GetHelp() string {
 	msg := "List of available commands\n /status - returns validator status, voting power, current block height " +
 		"and network block height\n /peers - returns number of connected peers\n /node - return status of caught-up\n" +
-		"/balance - returns the current balance of your account \n /rewards - returns validator rewards + commission in AKT\n /rpc_status - returns the status of lcd, validator and exteral endpoint\n /list - list out the available commands"
+		"/balance - returns the current balance of your account \n /rewards - returns validator rewards + commission in AKT\n /rpc_status - returns the status of lcd, validator and exteral endpoint\n /endpoints - returns RPC's and LCD enpoints \n /list - list out the available commands"
 
 	return msg
 }
@@ -146,6 +148,17 @@ func NodeStatus(cfg *config.Config, c client.Client) string {
 	status = fmt.Sprintf("Your validator node is %s \n", nodeSync)
 
 	return status
+}
+
+func GetEndpointsList(cfg *config.Config) string {
+
+	externalRPC := cfg.ExternalRPC
+	valRPC := cfg.ValidatorRPCEndpoint
+	LCD := cfg.LCDEndpoint
+
+	endpoints := fmt.Sprintf("Validator RPC :: %s \n External RPC ::  %s \n LCD ::   %s \n", valRPC, externalRPC, LCD)
+
+	return endpoints
 }
 
 // GetStatus returns the status messages for /status
