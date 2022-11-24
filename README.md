@@ -120,6 +120,13 @@ $   influx
 ex: CREATE DATABASE akash_alertbot
 ```
 
+Add a retention policy for the db
+```bash
+$ use db_name
+$ CREATE RETENTION POLICY "seven_days_only" ON db_name DURATION 7d REPLICATION 1 DEFAULT;
+$ show retention policies
+```
+
 Note : Before running the code make sure that you have configured all the required details otherwise the code may give fatal errors.
 
 - Build and run the alerting bot using binary
