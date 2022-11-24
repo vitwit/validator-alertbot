@@ -15,16 +15,16 @@ Validator alertbot for cosmos ecosystem
 
 ```sh
 $ cd $HOME
-$ wget -qO- https://repos.influxdata.com/influxdb.key | sudo apt-key add -
-$ source /etc/lsb-release
-$ echo "deb https://repos.influxdata.com/${DISTRIB_ID,,} ${DISTRIB_CODENAME} stable" | sudo tee /etc/apt/sources.list.d/influxdb.list
+$ wget -q https://repos.influxdata.com/influxdb.key
+$ echo '23a1c8836f0afc5ed24e0486339d7cc8f6790b83886c4c96995b88a061c5bb5d influxdb.key' | sha256sum -c && cat influxdb.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/influxdb.gpg > /dev/null
+$ echo 'deb [signed-by=/etc/apt/trusted.gpg.d/influxdb.gpg] https://repos.influxdata.com/debian stable main' | sudo tee /etc/apt/sources.list.d/influxdata.list
 ```
 
 #### Start influxDB
 
 ```sh
-$ sudo -S apt-get update && sudo apt-get install influxdb
-$ sudo -S service influxdb start
+$ sudo apt-get update && sudo apt-get install influxdb
+$ sudo service influxdb start
 
 The default port that runs the InfluxDB HTTP service is :8086
 ```
