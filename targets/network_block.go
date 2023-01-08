@@ -52,6 +52,12 @@ func GetNetworkLatestBlock(ops HTTPOptions, cfg *config.Config, c client.Client)
 		vaidatorBlockHeight, _ := strconv.Atoi(validatorHeight)
 		heightDiff := networkBlockHeight - vaidatorBlockHeight
 		oppHeightDiff := vaidatorBlockHeight - networkBlockHeight
+
+		if heightDiff < 0 {
+			log.Println("external rpc is missing blocks", heightDiff)
+			return
+		}
+
 		_ = writeToInfluxDb(c, bp, "vab_height_difference", map[string]string{}, map[string]interface{}{"difference": heightDiff})
 		log.Printf("Network height: %d and Validator Height: %d", networkBlockHeight, vaidatorBlockHeight)
 
