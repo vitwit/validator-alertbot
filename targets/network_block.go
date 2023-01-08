@@ -51,12 +51,7 @@ func GetNetworkLatestBlock(ops HTTPOptions, cfg *config.Config, c client.Client)
 
 		vaidatorBlockHeight, _ := strconv.Atoi(validatorHeight)
 		heightDiff := networkBlockHeight - vaidatorBlockHeight
-		oppHeightDiff := vaidatorBlockHeight - networkBlockHeight
-
-		if heightDiff < 0 {
-			log.Println("external rpc is missing blocks", heightDiff)
-			return
-		}
+		// oppHeightDiff := vaidatorBlockHeight - networkBlockHeight
 
 		_ = writeToInfluxDb(c, bp, "vab_height_difference", map[string]string{}, map[string]interface{}{"difference": heightDiff})
 		log.Printf("Network height: %d and Validator Height: %d", networkBlockHeight, vaidatorBlockHeight)
@@ -67,11 +62,6 @@ func GetNetworkLatestBlock(ops HTTPOptions, cfg *config.Config, c client.Client)
 			if strings.ToUpper(cfg.BlockDiffAlert.EnableAlert) == "YES" && int64(heightDiff) >= blockDiffThreshold {
 				_ = SendTelegramAlert(fmt.Sprintf("Block difference between network and validator has exceeded %d", blockDiffThreshold), cfg)
 				_ = SendEmailAlert(fmt.Sprintf("Block difference between network and validator has exceeded %d", blockDiffThreshold), cfg)
-
-				log.Println("Sent alert of block height difference")
-			} else if strings.ToUpper(cfg.BlockDiffAlert.EnableAlert) == "YES" && int64(oppHeightDiff) >= blockDiffThreshold {
-				_ = SendTelegramAlert(fmt.Sprintf("Block difference between validator and network has exceeded %d", blockDiffThreshold), cfg)
-				_ = SendEmailAlert(fmt.Sprintf("Block difference between validator and network has exceeded %d", blockDiffThreshold), cfg)
 
 				log.Println("Sent alert of block height difference")
 			}
