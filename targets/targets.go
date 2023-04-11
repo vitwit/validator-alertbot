@@ -24,18 +24,29 @@ func (m targetRunner) Run(function func(ops HTTPOptions, cfg *config.Config, c c
 }
 
 // InitTargets which returns the targets
-//can write all the endpoints here
+// can write all the endpoints here
 func InitTargets(cfg *config.Config) *Targets {
 	return &Targets{List: []Target{
 		{
 			ExecutionType: "http",
-			Name:          "Send missed blocks lerts",
+			Name:          "Send missed blocks alerts",
 			HTTPOptions: HTTPOptions{
-				Endpoint: cfg.ExternalRPC + "/status",
-				Method:   http.MethodGet,
+				Endpoint: cfg.LCDEndpoint + "/cosmos/slashing/v1beta1/signing_infos/" + cfg.ValidatorConsAddress,
+				//Endpoint: cfg.ExternalRPC + "/status",
+				Method: http.MethodGet,
 			},
 			Func:        MissedBlocks,
-			ScraperRate: "3s",
+			ScraperRate: cfg.Scraper.MissedBlockInterval,
+		},
+		{
+			ExecutionType: "http",
+			Name:          "Send index offset alert",
+			HTTPOptions: HTTPOptions{
+				Endpoint: cfg.LCDEndpoint + "/cosmos/slashing/v1beta1/signing_infos/" + cfg.ValidatorConsAddress,
+				Method:   http.MethodGet,
+			},
+			Func:        IndexOffSet,
+			ScraperRate: cfg.Scraper.IndexOffSetInterval,
 		},
 		{
 			ExecutionType: "http",

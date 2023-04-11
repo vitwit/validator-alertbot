@@ -24,7 +24,30 @@ type (
 		StatusCode int
 		Body       []byte
 	}
+	ValSigningInfo struct {
+		Address             string `json:"address"`
+		StartHeight         string `json:"start_height"`
+		IndexOffset         string `json:"index_offset"`
+		JailedUntil         string `json:"jailed_until"`
+		Tombstoned          bool   `json:"tombstoned"`
+		MissedBlocksCounter string `json:"missed_blocks_counter"`
+	}
 
+	MissedBlock struct {
+		ValSigningInfo ValSigningInfo `json:"val_signing_info"`
+	}
+
+	// ValSigningInfo struct {
+	// Consdata []Cons `json:"val_signing_info"`
+	// }
+	// Cons struct {
+	// Address             string    `json:"address"`
+	// StartHeight         string    `json:"start_height"`
+	// IndexOffset         string    `json:"index_offset"`
+	// JailedUntil         time.Time `json:"jailed_until"`
+	// Tombstoned          bool      `json:"tombstoned"`
+	// MissedBlocksCounter int64     `json:"missed_blocks_counter"`
+	// }
 	ValidatorResp struct {
 		Validator struct {
 			OperatorAddress   string      `json:"operator_address"`
