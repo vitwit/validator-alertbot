@@ -24,19 +24,19 @@ func MissedBlocks(ops HTTPOptions, cfg *config.Config, c client.Client) {
 		return
 	}
 
-	var b MissedBlock
+	var missed_block MissedBlock
 
-	err = json.Unmarshal(resp.Body, &b)
+	err = json.Unmarshal(resp.Body, &missed_block)
 
 	if err != nil {
 		log.Printf("Error while unmarshelling data : %v", err)
 		return
 	}
 
-	a := cfg.MissedBlocksAlert.MissedBlocksThreshold
-	temp := b.ValSigningInfo.MissedBlocksCounter
+	block_threshold := cfg.MissedBlocksAlert.MissedBlocksThreshold
+	temp := missed_block.ValSigningInfo.MissedBlocksCounter
 
-	i, err := strconv.ParseInt(temp, 10, 64)
+	current_missedblock_counter, err := strconv.ParseInt(temp, 10, 64)
 	if err != nil {
 		fmt.Println("error while converting string to int")
 	}
@@ -58,9 +58,13 @@ func MissedBlocks(ops HTTPOptions, cfg *config.Config, c client.Client) {
 
 	}
 
-	_ = writeToInfluxDb(c, bp, "val_missed_blocks", map[string]string{}, map[string]interface{}{"missed_block_counter": temp})
+	err = writeToInfluxDb(c, bp, "val_missed_blocks", map[string]string{}, map[string]interface{}{"missed_block_counter": temp})
+	if err != nil {
+		log.Printf("⛔⛔ Error while entering data into the database: %v", err)
+		return
+	}
 
-	if i-prev_missed_counter >= a {
+	if current_missedblock_counter-prev_missed_counter >= block_threshold {
 		_ = SendTelegramAlert(fmt.Sprintf("%s validator missed more than the threshold provided", cfg.ValidatorName), cfg)
 		_ = SendEmailAlert(fmt.Sprintf("%s validator missed more than the threshold provided", cfg.ValidatorName), cfg)
 
@@ -79,17 +83,17 @@ func IndexOffSet(ops HTTPOptions, cfg *config.Config, c client.Client) {
 		log.Printf("⛔⛔ Error while making a connection: %v", err)
 		return
 	}
-	var b MissedBlock
+	var missed_block MissedBlock
 
-	err = json.Unmarshal(resp.Body, &b)
+	err = json.Unmarshal(resp.Body, &missed_block)
 
 	if err != nil {
 		log.Printf("Error while unmarshelling data : %v", err)
 		return
 	}
-	a := cfg.MissedBlocksAlert.IndexOffSetThreshold
-	temp := b.ValSigningInfo.IndexOffset
-	i, err := strconv.ParseInt(temp, 10, 64)
+	offset_threshold := cfg.MissedBlocksAlert.IndexOffSetThreshold
+	temp := missed_block.ValSigningInfo.IndexOffset
+	current_index_offset, err := strconv.ParseInt(temp, 10, 64)
 	if err != nil {
 		fmt.Println("error while converting string to int")
 	}
@@ -113,9 +117,12 @@ func IndexOffSet(ops HTTPOptions, cfg *config.Config, c client.Client) {
 
 	}
 
-	_ = writeToInfluxDb(c, bp, "val_index_offset", map[string]string{}, map[string]interface{}{"index_offset": temp})
-
-	if i-prev_index_offset < a {
+	err = writeToInfluxDb(c, bp, "val_index_offset", map[string]string{}, map[string]interface{}{"index_offset": temp})
+	if err != nil {
+		log.Printf("⛔⛔ Error while entering offset data into the database: %v", err)
+		return
+	}
+	if current_index_offset-prev_index_offset < offset_threshold {
 		_ = SendTelegramAlert(fmt.Sprintf("%s validator index offset is less than the threshold", cfg.ValidatorName), cfg)
 		_ = SendEmailAlert(fmt.Sprintf("%s validator index offset is less than the threshold", cfg.ValidatorName), cfg)
 

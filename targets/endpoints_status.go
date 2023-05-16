@@ -14,9 +14,8 @@ func GetEndpointsStatus(ops HTTPOptions, cfg *config.Config, c client.Client) {
 	var msg string
 
 	ops = HTTPOptions{
-		Endpoint: cfg.LCDEndpoint + "/cosmos/slashing/v1beta1/signing_infos/" + cfg.ValidatorConsAddress,
-		//Endpoint: cfg.ExternalRPC + "/status",
-		Method: http.MethodGet,
+		Endpoint: cfg.ExternalRPC + "/status",
+		Method:   http.MethodGet,
 	}
 	_, err := HitHTTPTarget(ops)
 	if err != nil {

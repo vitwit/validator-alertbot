@@ -1,25 +1,25 @@
 # Validator rpc end point(RPC of your own validator)
 #useful to gather information about network info, validatr voting power etc.
-validator_rpc_endpoint = "http://5.161.139.201:26657"
+validator_rpc_endpoint = "http://localhost:26657"
 
 # Operator address of your validator
 #which will be used to get staking, delegation and distribution rewards.
-val_operator_addr = "cosmosvaloper1ddle9tczl87gsvmeva3c48nenyng4n56nghmjk"
+val_operator_addr = "cosmosvaloper1ddle9tczl87rsvmeva3c48nenyng4n56nghmjk"
 
 # Your validator account address
 #which will be used to get account informtion.
-account_addr = "cosmos1ddle9tczl87gsvmeva3c48nenyng4n56kurw79"
+account_addr = "cosmos1ddle9tczl87rsvmeva3c48nenyng4n56kurw79"
 
 # Validator cons address
 #useful to know about missed blocks and voting power.
-validator_cons_addr = "cosmosvalcons1d65x8dzt5d5lww0x2k2hwrdtjtyf4ysjdyv245"
+validator_cons_addr = "cosmosvalcons1d65x8dzt5d5rww0x2k2hwrdtjtyf4ysjdyv245"
 
 # Address of your lcd client
-lcd_endpoint = "http://5.161.139.201:1317"
+lcd_endpoint ="http://localhost:1317"
 
 # External open RPC endpoint(secondary RPC other than your own validator).
 #useful to gather information like validator caught up, syncing and missed blocks etc.
-external_rpc = "http://5.161.139.201:26657"
+external_rpc = "http://localhost:26657"
 
 # Name of your validator to be displayed in alerts
 validator_name = "vitwit"
