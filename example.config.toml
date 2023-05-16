@@ -4,25 +4,25 @@ validator_rpc_endpoint = "http://localhost:26657"
 
 # Operator address of your validator
 #which will be used to get staking, delegation and distribution rewards.
-val_operator_addr = "akashvaloper1qwlcuf2c2dhtgy8z5y7xxas96km0n5mw7821"
+val_operator_addr = "cosmosvaloper1ddle9tczl87rsvmeva3c48nenyng4n56nghmjk"
 
 # Your validator account address
 #which will be used to get account informtion.
-account_addr = "akash1rqqyllq4d02qmnjy80q5wggh93j37zvrfkcga"
+account_addr = "cosmos1ddle9tczl87rsvmeva3c48nenyng4n56kurw79"
 
-# Validator hex address
+# Validator cons address
 #useful to know about missed blocks and voting power.
-validator_hex_addr = "FABFCE1BAA453EAF8255BEDC5EE8E432AAA37B5"
+validator_cons_addr = "cosmosvalcons1d65x8dzt5d5rww0x2k2hwrdtjtyf4ysjdyv245"
 
 # Address of your lcd client
-lcd_endpoint = "http://localhost:1317"
+lcd_endpoint ="http://localhost:1317"
 
 # External open RPC endpoint(secondary RPC other than your own validator).
 #useful to gather information like validator caught up, syncing and missed blocks etc.
-external_rpc = "http://46.101.176.149:26657"
+external_rpc = "http://localhost:26657"
 
 # Name of your validator to be displayed in alerts
-validator_name = "Akash"
+validator_name = "vitwit"
 
 # These are for regular status updates. 
 # To receive validator status daily (twice), configure these parameters in the form of "02:25PM". The time here refers to UTC time.
@@ -67,6 +67,7 @@ num_peers_threshold = 0
 [missed_blocks_alert]
 enable_alert = "yes"
 missed_blocks_threshold = 4
+index_offset_threshold=100
 
 [delegation_alerts]
 delegation_amount_threshold = 6.98
@@ -93,3 +94,5 @@ username = "vitwit"
 rate = "3s"
 port = ":8080"
 validator_rate = "60s"
+missed_block_interval="900s"
+index_offset_interval="600s"

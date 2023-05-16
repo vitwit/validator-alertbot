@@ -78,7 +78,7 @@ func TelegramAlerting(ops HTTPOptions, cfg *config.Config, c client.Client) {
 // GetEndPointsStatus retsurns status of the configured endpoints i.e, lcd, val and external rpc.
 func GetEndPointsStatus(cfg *config.Config) string {
 	ops := HTTPOptions{
-		Endpoint: cfg.ExternalRPC + "/status",
+		Endpoint: cfg.LCDEndpoint + "/cosmos/slashing/v1beta1/signing_infos/" + cfg.ValidatorConsAddress,
 		Method:   http.MethodGet,
 	}
 	var msg string

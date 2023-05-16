@@ -1,3 +1,4 @@
+// adding cons struct
 package config
 
 import (
@@ -29,9 +30,11 @@ type (
 
 	//Scraper time interval
 	Scraper struct {
-		Rate          string `mapstructure:"rate"`
-		Port          string `mapstructure:"port"`
-		ValidatorRate string `mapstructure:"validator_rate"`
+		Rate                string `mapstructure:"rate"`
+		Port                string `mapstructure:"port"`
+		ValidatorRate       string `mapstructure:"validator_rate"`
+		MissedBlockInterval string `mapstructure:"missed_block_interval"`
+		IndexOffSetInterval string `mapstructure:"index_offset_interval"`
 	}
 
 	// BlockDiffAlert defines about block diff alert
@@ -56,6 +59,7 @@ type (
 	MissedBlocksAlert struct {
 		EnableAlert           string `mapstructure:"enable_alert"`
 		MissedBlocksThreshold int64  `mapstructure:"missed_blocks_threshold"`
+		IndexOffSetThreshold  int64  `mapstructure:"index_offset_threshold"`
 	}
 
 	DelegationAlerts struct {
@@ -76,7 +80,7 @@ type (
 	Config struct {
 		ValidatorRPCEndpoint string            `mapstructure:"validator_rpc_endpoint"`
 		ValOperatorAddress   string            `mapstructure:"val_operator_addr"`
-		ValidatorHexAddress  string            `mapstructure:"validator_hex_addr"`
+		ValidatorConsAddress string            `mapstructure:"validator_cons_addr"`
 		LCDEndpoint          string            `mapstructure:"lcd_endpoint"`
 		Denom                string            `mapstructure:"denom"`
 		EnableAlerts         EnableAlerts      `mapstructure:"enable_alerts"`
